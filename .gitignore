@@ -1,0 +1,17 @@
+# Gradle build state and outputs
+.gradle/
+build/
+
+# Fabric development game directory
+run/
+
+# Runtime logs
+logs/
+
+# Agent working notes, deliberately not versioned
+docs/plans/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
