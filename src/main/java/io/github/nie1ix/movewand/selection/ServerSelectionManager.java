@@ -1,0 +1,49 @@
+package io.github.nie1ix.movewand.selection;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+public final class ServerSelectionManager {
+    private static final Map<UUID, SelectionEditor> EDITORS = new HashMap<>();
+
+    private ServerSelectionManager() {
+    }
+
+    public static void initialize() {
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> EDITORS.remove(handler.player.getUUID()));
+    }
+
+    public static void select(ServerPlayer player, BlockPos position, boolean individualBlock) {
+        SelectionEditor editor = EDITORS.computeIfAbsent(player.getUUID(), ignored -> new SelectionEditor());
+        if (individualBlock) {
+            editor.toggleBlock(position);
+            player.displayClientMessage(Component.translatable("message.movewand.selection.toggled"), true);
+            return;
+        }
+
+        if (editor.selectBoxCorner(position)) {
+            player.displayClientMessage(Component.translatable("message.movewand.selection.corner"), true);
+        } else {
+            player.displayClientMessage(Component.translatable("message.movewand.selection.too_large"), true);
+        }
+    }
+
+    public static Optional<BlockSelection> selection(ServerPlayer player) {
+        return Optional.ofNullable(EDITORS.get(player.getUUID())).flatMap(SelectionEditor::selection);
+    }
+
+    public static void replace(ServerPlayer player, BlockSelection selection) {
+        EDITORS.computeIfAbsent(player.getUUID(), ignored -> new SelectionEditor()).replace(selection);
+    }
+
+    public static void clear(ServerPlayer player) {
+        EDITORS.remove(player.getUUID());
+    }
+}

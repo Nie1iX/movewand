@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "movewand",
+  "version": "${version}",
+  "name": "MoveWand",
+  "description": "A survival tool for safely moving and rotating existing structures.",
+  "authors": [
+    "artur"
+  ],
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.nie1ix.movewand.MoveWand"
+    ],
+    "client": [
+      "io.github.nie1ix.movewand.client.MoveWandClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
