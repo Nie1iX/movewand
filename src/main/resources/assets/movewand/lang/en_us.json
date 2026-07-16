@@ -19,6 +19,8 @@
   "screen.movewand.cancel": "Cancel",
   "screen.movewand.clear_selection": "Clear selection",
   "message.movewand.selection.corner": "MoveWand selection corner set",
+  "message.movewand.selection.first_corner": "MoveWand first selection corner set",
+  "message.movewand.selection.size": "MoveWand selected %s blocks",
   "message.movewand.selection.toggled": "MoveWand block selection changed",
   "message.movewand.selection.too_large": "MoveWand selection is too large",
   "message.movewand.selection.empty": "Select at least one non-air block first",
@@ -26,6 +28,7 @@
   "message.movewand.move.unloaded": "The destination chunk is not loaded",
   "message.movewand.move.too_far": "MoveWand can move a selection by at most 16 blocks",
   "message.movewand.move.unmovable": "This block cannot be moved",
+  "message.movewand.move.unsurvivable": "This block cannot survive at the destination",
   "message.movewand.move.no_change": "Choose a move or rotation first",
   "message.movewand.move.block_entity": "The block entity could not be read",
   "message.movewand.move.success": "Moved"

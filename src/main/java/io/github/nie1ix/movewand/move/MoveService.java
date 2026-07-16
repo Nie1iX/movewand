@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.tags.TagKey;
 import net.minecraft.resources.ResourceLocation;
@@ -19,6 +18,7 @@ import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.selection.BlockSelection;
 import io.github.nie1ix.movewand.selection.ServerSelectionManager;
 import io.github.nie1ix.movewand.transform.SelectionTransform;
+import io.github.nie1ix.movewand.transform.BlockStateTransform;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -115,11 +115,20 @@ public final class MoveService {
                 // Preserve inventory and other persistent BlockEntity state before replacing the block.
                 blockEntityData.put(position, blockEntity.saveWithoutMetadata(level.registryAccess()));
             }
-            states.put(position, rotate(state, turns));
+            states.put(position, BlockStateTransform.rotateY(state, turns));
         }
 
+        if (states.entrySet().stream().anyMatch(entry -> !entry.getValue().canSurvive(level, destinations.get(entry.getKey())))) {
+            player.displayClientMessage(Component.translatable("message.movewand.move.unsurvivable"), true);
+            return;
+        }
+
+        // Remove captured BlockEntities first so container blocks cannot drop their inventory on removal.
+        for (BlockPos position : blockEntityData.keySet()) {
+            level.removeBlockEntity(position);
+        }
         for (BlockPos position : source.positions()) {
-            level.setBlock(position, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+            level.setBlock(position, Blocks.AIR.defaultBlockState(), sourceClearFlags());
         }
         for (Map.Entry<BlockPos, BlockState> entry : states.entrySet()) {
             level.setBlock(destinations.get(entry.getKey()), entry.getValue(), Block.UPDATE_CLIENTS);
@@ -152,6 +161,10 @@ public final class MoveService {
         return squaredDistance > 0 && squaredDistance <= (long) MAX_OFFSET_DISTANCE * MAX_OFFSET_DISTANCE;
     }
 
+    static int sourceClearFlags() {
+        return Block.UPDATE_CLIENTS | Block.UPDATE_SUPPRESS_DROPS;
+    }
+
     static CompoundTag relocatedBlockEntityData(CompoundTag snapshot, BlockPos destination) {
         // BlockEntity NBT can include its position; copy first so the original snapshot stays reusable.
         CompoundTag relocated = snapshot.copy();
@@ -161,11 +174,4 @@ public final class MoveService {
         return relocated;
     }
 
-    private static BlockState rotate(BlockState state, int clockwiseTurns) {
-        BlockState rotated = state;
-        for (int turn = 0; turn < clockwiseTurns; turn++) {
-            rotated = rotated.rotate(Rotation.CLOCKWISE_90);
-        }
-        return rotated;
-    }
 }

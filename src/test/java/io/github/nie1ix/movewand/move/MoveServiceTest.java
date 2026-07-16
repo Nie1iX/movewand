@@ -36,4 +36,13 @@ class MoveServiceTest {
         assertEquals(20, relocated.getInt("y"));
         assertEquals(30, relocated.getInt("z"));
     }
+
+    @Test
+    void clearsSourcesWithNoDropFlags() {
+        int flags = MoveService.sourceClearFlags();
+
+        assertTrue((flags & net.minecraft.world.level.block.Block.UPDATE_CLIENTS) != 0);
+        assertTrue((flags & net.minecraft.world.level.block.Block.UPDATE_SUPPRESS_DROPS) != 0);
+        assertFalse((flags & net.minecraft.world.level.block.Block.UPDATE_NEIGHBORS) != 0);
+    }
 }

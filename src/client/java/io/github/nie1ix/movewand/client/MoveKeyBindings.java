@@ -15,12 +15,12 @@ public final class MoveKeyBindings {
     private static final KeyMapping BACKWARD = register("key.movewand.move_backward", GLFW.GLFW_KEY_DOWN);
     private static final KeyMapping LEFT = register("key.movewand.move_left", GLFW.GLFW_KEY_LEFT);
     private static final KeyMapping RIGHT = register("key.movewand.move_right", GLFW.GLFW_KEY_RIGHT);
-    private static final KeyMapping UP = register("key.movewand.move_up", GLFW.GLFW_KEY_PAGE_UP);
-    private static final KeyMapping DOWN = register("key.movewand.move_down", GLFW.GLFW_KEY_PAGE_DOWN);
+    private static final KeyMapping UP = register("key.movewand.move_up", GLFW.GLFW_KEY_R);
+    private static final KeyMapping DOWN = register("key.movewand.move_down", GLFW.GLFW_KEY_V);
     private static final KeyMapping ROTATE_CLOCKWISE = register("key.movewand.rotate_clockwise", GLFW.GLFW_KEY_RIGHT_BRACKET);
     private static final KeyMapping ROTATE_COUNTER_CLOCKWISE = register("key.movewand.rotate_counter_clockwise", GLFW.GLFW_KEY_LEFT_BRACKET);
     private static final KeyMapping APPLY = register("key.movewand.apply", GLFW.GLFW_KEY_ENTER);
-    private static final KeyMapping CANCEL = register("key.movewand.cancel", GLFW.GLFW_KEY_ESCAPE);
+    private static final KeyMapping CANCEL = register("key.movewand.cancel", GLFW.GLFW_KEY_BACKSPACE);
     private static final KeyMapping CLEAR_SELECTION = register("key.movewand.clear_selection", GLFW.GLFW_KEY_DELETE);
 
     private MoveKeyBindings() {

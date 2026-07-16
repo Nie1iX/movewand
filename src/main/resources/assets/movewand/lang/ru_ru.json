@@ -19,6 +19,8 @@
   "screen.movewand.cancel": "Отменить",
   "screen.movewand.clear_selection": "Очистить выделение",
   "message.movewand.selection.corner": "Точка выделения MoveWand установлена",
+  "message.movewand.selection.first_corner": "Первая точка выделения MoveWand установлена",
+  "message.movewand.selection.size": "MoveWand: выбрано блоков: %s",
   "message.movewand.selection.toggled": "Поблочное выделение MoveWand изменено",
   "message.movewand.selection.too_large": "Выделение MoveWand слишком большое",
   "message.movewand.selection.empty": "Сначала выделите хотя бы один блок",
@@ -26,6 +28,7 @@
   "message.movewand.move.unloaded": "Целевой чанк не загружен",
   "message.movewand.move.too_far": "MoveWand может сдвинуть выделение не более чем на 16 блоков",
   "message.movewand.move.unmovable": "Этот блок перемещать нельзя",
+  "message.movewand.move.unsurvivable": "Этот блок не сможет существовать в целевой позиции",
   "message.movewand.move.no_change": "Сначала выберите перемещение или поворот",
   "message.movewand.move.block_entity": "Не удалось прочитать данные блока",
   "message.movewand.move.success": "Перемещено"

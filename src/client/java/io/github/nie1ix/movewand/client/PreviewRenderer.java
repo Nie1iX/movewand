@@ -4,13 +4,14 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import io.github.nie1ix.movewand.move.MoveService;
 import io.github.nie1ix.movewand.selection.BlockSelection;
+import io.github.nie1ix.movewand.transform.BlockStateTransform;
 import io.github.nie1ix.movewand.transform.SelectionTransform;
 
-import java.util.Set;
+import java.util.Map;
 
 public final class PreviewRenderer {
     private PreviewRenderer() {
@@ -22,6 +23,8 @@ public final class PreviewRenderer {
                 return;
             }
 
+            Vec3 camera = context.camera().getPosition();
+            ClientSelectionHandler.pendingBoxCorner().ifPresent(corner -> renderPendingBoxCorner(context, camera, corner));
             ClientSelectionHandler.selection().ifPresent(selection -> {
                 if (TransformPreview.isActive()) {
                     renderPreview(context, selection);
@@ -34,13 +37,18 @@ public final class PreviewRenderer {
 
     private static void renderPreview(net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context, BlockSelection selection) {
         BlockPos offset = TransformPreview.offset();
-        Set<BlockPos> targets = Set.copyOf(SelectionTransform.transformMap(selection, offset, TransformPreview.clockwiseTurns()).values());
-        boolean withinRange = MoveService.hasValidOffset(offset.getX(), offset.getY(), offset.getZ());
+        Map<BlockPos, BlockPos> targets = SelectionTransform.transformMap(selection, offset, TransformPreview.clockwiseTurns());
+        boolean withinRange = TransformPreview.isOffsetWithinRange(offset);
         Vec3 camera = context.camera().getPosition();
 
-        for (BlockPos target : targets) {
+        for (Map.Entry<BlockPos, BlockPos> entry : targets.entrySet()) {
+            BlockPos target = entry.getValue();
+            BlockState state = BlockStateTransform.rotateY(
+                    context.world().getBlockState(entry.getKey()),
+                    TransformPreview.clockwiseTurns()
+            );
             boolean emptyOrOverlapping = selection.positions().contains(target) || context.world().getBlockState(target).isAir();
-            boolean valid = withinRange && emptyOrOverlapping;
+            boolean valid = withinRange && emptyOrOverlapping && state.canSurvive(context.world(), target);
             float red = valid ? 0.1f : 1.0f;
             float green = valid ? 0.45f : 0.1f;
             float blue = valid ? 1.0f : 0.1f;
@@ -55,6 +63,23 @@ public final class PreviewRenderer {
                     0.8f
             );
         }
+    }
+
+    private static void renderPendingBoxCorner(
+            net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context,
+            Vec3 camera,
+            BlockPos corner
+    ) {
+        AABB box = new AABB(corner).move(-camera.x, -camera.y, -camera.z).inflate(0.004);
+        LevelRenderer.renderLineBox(
+                context.matrixStack(),
+                context.consumers().getBuffer(RenderType.lines()),
+                box,
+                1.0f,
+                0.75f,
+                0.1f,
+                1.0f
+        );
     }
 
     private static void renderSelection(net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context, BlockSelection selection) {

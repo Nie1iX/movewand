@@ -34,6 +34,10 @@ public final class ClientSelectionHandler {
         return EDITOR.selection();
     }
 
+    public static Optional<net.minecraft.core.BlockPos> pendingBoxCorner() {
+        return EDITOR.pendingBoxCorner();
+    }
+
     public static void replace(io.github.nie1ix.movewand.selection.BlockSelection selection) {
         EDITOR.replace(selection);
         TransformPreview.cancel();
