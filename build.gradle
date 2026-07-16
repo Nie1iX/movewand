@@ -2,6 +2,12 @@ plugins {
 	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 }
 
+repositories {
+	maven {
+		url = "https://api.modrinth.com/maven"
+	}
+}
+
 version = project.mod_version
 group = project.maven_group
 
@@ -21,6 +27,8 @@ dependencies {
 	mappings loom.officialMojangMappings()
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	modCompileOnly "maven.modrinth:modmenu:11.0.4"
+	modLocalRuntime "maven.modrinth:modmenu:11.0.4"
 
 	testImplementation platform('org.junit:junit-bom:5.11.4')
 	testImplementation 'org.junit.jupiter:junit-jupiter'

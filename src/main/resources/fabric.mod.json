@@ -14,6 +14,9 @@
     ],
     "client": [
       "io.github.nie1ix.movewand.client.MoveWandClient"
+    ],
+    "modmenu": [
+      "io.github.nie1ix.movewand.client.MoveWandModMenu"
     ]
   },
   "depends": {
