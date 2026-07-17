@@ -35,6 +35,10 @@ public final class MoveService {
             Registries.BLOCK,
             ResourceLocation.fromNamespaceAndPath("c", "relocation_not_supported")
     );
+    private static final TagKey<Block> MOVEWAND_RELOCATION_NOT_SUPPORTED = TagKey.create(
+            Registries.BLOCK,
+            ResourceLocation.fromNamespaceAndPath("movewand", "relocation_not_supported")
+    );
     private static final TagKey<Block> CREATE_NON_MOVABLE = TagKey.create(
             Registries.BLOCK,
             ResourceLocation.fromNamespaceAndPath("create", "non_movable")
@@ -85,7 +89,10 @@ public final class MoveService {
         if (source.positions().stream().anyMatch(position -> {
             BlockState state = level.getBlockState(position);
             return state.is(Blocks.BEDROCK)
+                    || state.is(Blocks.SPAWNER)
+                    || state.is(Blocks.TRIAL_SPAWNER)
                     || state.is(RELOCATION_NOT_SUPPORTED)
+                    || state.is(MOVEWAND_RELOCATION_NOT_SUPPORTED)
                     || state.is(CREATE_NON_MOVABLE)
                     || state.is(FORGE_RELOCATION_NOT_SUPPORTED);
         })) {
@@ -116,7 +123,12 @@ public final class MoveService {
                     return;
                 }
                 // Preserve inventory and other persistent BlockEntity state before replacing the block.
-                blockEntityData.put(position, blockEntity.saveWithoutMetadata(level.registryAccess()));
+                CompoundTag data = blockEntity.saveWithoutMetadata(level.registryAccess());
+                if (data.contains("Lock") && !data.getString("Lock").isEmpty()) {
+                    player.displayClientMessage(Component.translatable("message.movewand.move.unmovable"), true);
+                    return;
+                }
+                blockEntityData.put(position, data);
             }
             states.put(position, BlockStateTransform.rotateY(state, turns));
         }
