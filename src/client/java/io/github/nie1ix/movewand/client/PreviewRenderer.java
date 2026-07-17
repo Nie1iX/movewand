@@ -1,13 +1,17 @@
 package io.github.nie1ix.movewand.client;
 
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.selection.BlockSelection;
 import io.github.nie1ix.movewand.move.MoveProjection;
 import io.github.nie1ix.movewand.transform.BlockStateTransform;
@@ -25,6 +29,10 @@ public final class PreviewRenderer {
             if (context.world() == null || context.matrixStack() == null || context.consumers() == null) {
                 return;
             }
+            if (Minecraft.getInstance().player == null
+                    || !shouldRenderSelection(Minecraft.getInstance().player.getMainHandItem(), ModItems.MOVE_WAND)) {
+                return;
+            }
 
             Vec3 camera = context.camera().getPosition();
             ClientSelectionHandler.pendingBoxCorner().ifPresent(corner -> renderPendingBoxCorner(context, camera, corner));
@@ -36,6 +44,10 @@ public final class PreviewRenderer {
                 }
             });
         });
+    }
+
+    static boolean shouldRenderSelection(ItemStack mainHandItem, Item moveWand) {
+        return mainHandItem.is(moveWand);
     }
 
     private static void renderPreview(net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context, BlockSelection selection) {

@@ -62,6 +62,8 @@ public final class SelectionEditor {
             return;
         }
 
+        pendingBoxCorner = null;
+
         if (positions.containsAll(blocks)) {
             positions.removeAll(blocks);
             if (!positions.contains(pivot)) {

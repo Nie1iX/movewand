@@ -67,6 +67,18 @@ class SelectionEditorTest {
     }
 
     @Test
+    void togglingBlocksCancelsAnUnfinishedBoxSelection() {
+        SelectionEditor editor = new SelectionEditor();
+        BlockPos individualBlock = new BlockPos(1, 2, 3);
+
+        editor.selectBoxCorner(BlockPos.ZERO);
+        editor.toggleBlocks(Set.of(individualBlock), individualBlock);
+
+        assertTrue(editor.pendingBoxCorner().isEmpty());
+        assertEquals(Set.of(individualBlock), editor.selection().orElseThrow().positions());
+    }
+
+    @Test
     void usesTheFirstIndividuallyAddedBlockAsThePivot() {
         SelectionEditor editor = new SelectionEditor();
         BlockPos firstBlock = new BlockPos(1, 2, 3);
