@@ -15,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -103,7 +104,8 @@ public final class PreviewRenderer {
             Vec3 camera
     ) {
         VertexConsumer vertices = new AlphaVertexConsumer(context.consumers().getBuffer(GHOST_RENDER_TYPE));
-        MultiBufferSource buffers = ignored -> vertices;
+        MultiBufferSource blockAtlasBuffers = ignored -> vertices;
+        MultiBufferSource nativeBuffers = renderType -> new AlphaVertexConsumer(context.consumers().getBuffer(renderType));
         BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
         PoseStack matrices = context.matrixStack();
 
@@ -112,7 +114,11 @@ public final class PreviewRenderer {
             matrices.pushPose();
             matrices.translate(target.getX() - camera.x, target.getY() - camera.y, target.getZ() - camera.z);
             blockRenderer.renderSingleBlock(
-                    states.get(entry.getKey()), matrices, buffers, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY
+                    states.get(entry.getKey()),
+                    matrices,
+                    usesBlockAtlasGhost(states.get(entry.getKey()).getRenderShape()) ? blockAtlasBuffers : nativeBuffers,
+                    LightTexture.FULL_BRIGHT,
+                    OverlayTexture.NO_OVERLAY
             );
             matrices.popPose();
         }
@@ -120,6 +126,10 @@ public final class PreviewRenderer {
 
     static int ghostAlpha(int alpha) {
         return Math.min(alpha, GHOST_ALPHA);
+    }
+
+    static boolean usesBlockAtlasGhost(RenderShape renderShape) {
+        return renderShape != RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     private static final class AlphaVertexConsumer implements VertexConsumer {
