@@ -70,7 +70,11 @@ public final class ServerSelectionManager {
                         player.serverLevel()::getBlockState
                 ).size())
                 .orElse(0);
-        player.displayClientMessage(Component.translatable("message.movewand.selection.size", size), true);
+        player.displayClientMessage(selectionSizeMessage(size), true);
+    }
+
+    static Component selectionSizeMessage(int size) {
+        return size == 0 ? Component.empty() : Component.translatable("message.movewand.selection.size", size);
     }
 
     public static void sendSelectionUpdate(ServerPlayer player) {
