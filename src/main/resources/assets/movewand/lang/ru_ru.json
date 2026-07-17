@@ -25,6 +25,7 @@
   "message.movewand.move.unloaded": "Целевой чанк не загружен",
   "message.movewand.move.too_far": "MoveWand может сдвинуть выделение не более чем на 16 блоков",
   "message.movewand.move.unmovable": "Этот блок перемещать нельзя",
+  "message.movewand.move.double_chest": "Выберите обе половины двойного сундука",
   "message.movewand.move.unsurvivable": "Этот блок не сможет существовать в целевой позиции",
   "message.movewand.move.no_change": "Сначала выберите перемещение или поворот",
   "message.movewand.move.block_entity": "Не удалось прочитать данные блока",

@@ -80,7 +80,7 @@ public final class MoveService {
                 .filter(position -> !level.getBlockState(position).isAir())
                 .collect(java.util.stream.Collectors.toUnmodifiableSet());
         if (selectsOneHalfOfDoubleChest(selectedPositions, level)) {
-            player.displayClientMessage(Component.translatable("message.movewand.move.unmovable"), true);
+            player.displayClientMessage(Component.translatable("message.movewand.move.double_chest"), true);
             return;
         }
         Set<BlockPos> positions = StructureSelection.expandPairedBlocks(selectedPositions, level::getBlockState);

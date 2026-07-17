@@ -25,6 +25,7 @@
   "message.movewand.move.unloaded": "The destination chunk is not loaded",
   "message.movewand.move.too_far": "MoveWand can move a selection by at most 16 blocks",
   "message.movewand.move.unmovable": "This block cannot be moved",
+  "message.movewand.move.double_chest": "Select both halves of the double chest",
   "message.movewand.move.unsurvivable": "This block cannot survive at the destination",
   "message.movewand.move.no_change": "Choose a move or rotation first",
   "message.movewand.move.block_entity": "The block entity could not be read",
