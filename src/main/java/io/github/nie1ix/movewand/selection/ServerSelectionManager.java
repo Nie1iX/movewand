@@ -56,7 +56,12 @@ public final class ServerSelectionManager {
     }
 
     private static void showSelectionSize(ServerPlayer player, SelectionEditor editor) {
-        int size = editor.selection().map(selection -> selection.positions().size()).orElse(0);
+        int size = editor.selection()
+                .map(selection -> StructureSelection.expandPairedBlocks(
+                        selection.positions(),
+                        player.serverLevel()::getBlockState
+                ).size())
+                .orElse(0);
         player.displayClientMessage(Component.translatable("message.movewand.selection.size", size), true);
     }
 
