@@ -1,6 +1,7 @@
 package io.github.nie1ix.movewand.move;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -8,9 +9,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.tags.TagKey;
 import net.minecraft.resources.ResourceLocation;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -76,6 +79,10 @@ public final class MoveService {
         Set<BlockPos> selectedPositions = selected.get().positions().stream()
                 .filter(position -> !level.getBlockState(position).isAir())
                 .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        if (selectsOneHalfOfDoubleChest(selectedPositions, level)) {
+            player.displayClientMessage(Component.translatable("message.movewand.move.unmovable"), true);
+            return;
+        }
         Set<BlockPos> positions = StructureSelection.expandPairedBlocks(selectedPositions, level::getBlockState);
         if (positions.isEmpty()) {
             player.displayClientMessage(Component.translatable("message.movewand.selection.empty"), true);
@@ -175,6 +182,27 @@ public final class MoveService {
     public static boolean hasValidOffset(int x, int y, int z) {
         long squaredDistance = (long) x * x + (long) y * y + (long) z * z;
         return squaredDistance > 0 && squaredDistance <= (long) MAX_OFFSET_DISTANCE * MAX_OFFSET_DISTANCE;
+    }
+
+    private static boolean selectsOneHalfOfDoubleChest(Set<BlockPos> positions, ServerLevel level) {
+        for (BlockPos position : positions) {
+            BlockState state = level.getBlockState(position);
+            if (!(state.getBlock() instanceof ChestBlock) || state.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
+                continue;
+            }
+            for (Direction direction : Direction.Plane.HORIZONTAL) {
+                BlockPos otherPosition = position.relative(direction);
+                BlockState otherState = level.getBlockState(otherPosition);
+                if (otherState.is(state.getBlock())
+                        && otherState.getValue(ChestBlock.FACING) == state.getValue(ChestBlock.FACING)
+                        && otherState.getValue(ChestBlock.TYPE) != ChestType.SINGLE
+                        && otherState.getValue(ChestBlock.TYPE) != state.getValue(ChestBlock.TYPE)
+                        && !positions.contains(otherPosition)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     static int sourceClearFlags() {

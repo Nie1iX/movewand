@@ -23,6 +23,7 @@ import net.minecraft.world.item.component.WritableBookContent;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.gametest.framework.GameTestHelper;
 import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.selection.BlockSelection;
@@ -144,6 +146,28 @@ public final class MoveBlockEntityGameTest implements ModInitializer, FabricGame
 
         context.assertBlockPresent(TEST_BLOCK, SOURCE_RELATIVE);
         context.assertBlockPresent(Blocks.AIR, SOURCE_RELATIVE.east());
+        context.succeed();
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void doesNotMoveOneHalfOfDoubleChest(GameTestHelper context) {
+        BlockState left = Blocks.CHEST.defaultBlockState()
+                .setValue(ChestBlock.FACING, net.minecraft.core.Direction.NORTH)
+                .setValue(ChestBlock.TYPE, ChestType.LEFT);
+        BlockState right = Blocks.CHEST.defaultBlockState()
+                .setValue(ChestBlock.FACING, net.minecraft.core.Direction.NORTH)
+                .setValue(ChestBlock.TYPE, ChestType.RIGHT);
+        context.setBlock(SOURCE_RELATIVE, left);
+        context.setBlock(SOURCE_RELATIVE.east(), right);
+
+        ServerPlayer player = makeServerPlayer(context);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.MOVE_WAND));
+        ServerSelectionManager.replace(player, BlockSelection.of(List.of(context.absolutePos(SOURCE_RELATIVE))));
+        MoveService.move(player, 0, 0, 1, 0);
+
+        context.assertBlockPresent(Blocks.CHEST, SOURCE_RELATIVE);
+        context.assertBlockPresent(Blocks.CHEST, SOURCE_RELATIVE.east());
+        context.assertBlockPresent(Blocks.AIR, SOURCE_RELATIVE.south());
         context.succeed();
     }
 
