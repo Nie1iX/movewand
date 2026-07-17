@@ -8,6 +8,7 @@ import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TransformPreviewTest {
@@ -28,5 +29,11 @@ class TransformPreviewTest {
 
         assertTrue(PreviewRenderer.shouldRenderSelection(new ItemStack(Items.STICK), Items.STICK));
         assertFalse(PreviewRenderer.shouldRenderSelection(new ItemStack(Items.DIRT), Items.STICK));
+    }
+
+    @Test
+    void limitsGhostBlockAlphaWithoutMakingTransparentVerticesOpaque() {
+        assertEquals(96, PreviewRenderer.ghostAlpha(255));
+        assertEquals(48, PreviewRenderer.ghostAlpha(48));
     }
 }

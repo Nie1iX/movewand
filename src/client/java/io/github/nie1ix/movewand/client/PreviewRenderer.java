@@ -1,9 +1,16 @@
 package io.github.nie1ix.movewand.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -21,6 +28,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class PreviewRenderer {
+    private static final int GHOST_ALPHA = 96;
+    private static final RenderType GHOST_RENDER_TYPE = RenderType.entityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
+
     private PreviewRenderer() {
     }
 
@@ -63,6 +73,7 @@ public final class PreviewRenderer {
         LevelReader projectedLevel = MoveProjection.levelAfterMove(context.world(), states, targets);
         boolean withinRange = TransformPreview.isOffsetWithinRange(offset);
         Vec3 camera = context.camera().getPosition();
+        renderGhostBlocks(context, targets, states, camera);
 
         for (Map.Entry<BlockPos, BlockPos> entry : targets.entrySet()) {
             BlockPos target = entry.getValue();
@@ -82,6 +93,76 @@ public final class PreviewRenderer {
                     blue,
                     0.8f
             );
+        }
+    }
+
+    private static void renderGhostBlocks(
+            net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context,
+            Map<BlockPos, BlockPos> targets,
+            Map<BlockPos, BlockState> states,
+            Vec3 camera
+    ) {
+        VertexConsumer vertices = new AlphaVertexConsumer(context.consumers().getBuffer(GHOST_RENDER_TYPE));
+        MultiBufferSource buffers = ignored -> vertices;
+        BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
+        PoseStack matrices = context.matrixStack();
+
+        for (Map.Entry<BlockPos, BlockPos> entry : targets.entrySet()) {
+            BlockPos target = entry.getValue();
+            matrices.pushPose();
+            matrices.translate(target.getX() - camera.x, target.getY() - camera.y, target.getZ() - camera.z);
+            blockRenderer.renderSingleBlock(
+                    states.get(entry.getKey()), matrices, buffers, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY
+            );
+            matrices.popPose();
+        }
+    }
+
+    static int ghostAlpha(int alpha) {
+        return Math.min(alpha, GHOST_ALPHA);
+    }
+
+    private static final class AlphaVertexConsumer implements VertexConsumer {
+        private final VertexConsumer delegate;
+
+        private AlphaVertexConsumer(VertexConsumer delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public VertexConsumer addVertex(float x, float y, float z) {
+            delegate.addVertex(x, y, z);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setColor(int red, int green, int blue, int alpha) {
+            delegate.setColor(red, green, blue, ghostAlpha(alpha));
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setUv(float u, float v) {
+            delegate.setUv(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setUv1(int u, int v) {
+            delegate.setUv1(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setUv2(int u, int v) {
+            delegate.setUv2(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setNormal(float x, float y, float z) {
+            delegate.setNormal(x, y, z);
+            return this;
         }
     }
 
