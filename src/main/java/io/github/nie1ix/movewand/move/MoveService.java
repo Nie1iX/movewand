@@ -23,6 +23,8 @@ import io.github.nie1ix.movewand.selection.StructureSelection;
 import io.github.nie1ix.movewand.transform.SelectionTransform;
 import io.github.nie1ix.movewand.transform.BlockStateTransform;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -164,6 +166,7 @@ public final class MoveService {
                 blockEntity.setChanged();
             }
         }
+        updateBoundaryShapes(level, source.positions(), destinations.values());
         for (BlockPos position : source.positions()) {
             level.updateNeighborsAt(position, level.getBlockState(position).getBlock());
         }
@@ -175,6 +178,23 @@ public final class MoveService {
         ServerSelectionManager.replace(player, updatedSelection);
         ServerSelectionManager.sendSelectionUpdate(player);
         player.displayClientMessage(Component.translatable("message.movewand.move.success"), true);
+    }
+
+    private static void updateBoundaryShapes(ServerLevel level, Set<BlockPos> sourcePositions,
+                                             Collection<BlockPos> destinationPositions) {
+        Set<BlockPos> structurePositions = new HashSet<>(sourcePositions);
+        structurePositions.addAll(destinationPositions);
+        for (BlockPos position : structurePositions) {
+            for (Direction direction : Direction.values()) {
+                BlockPos neighbor = position.relative(direction);
+                if (structurePositions.contains(neighbor)) {
+                    continue;
+                }
+                BlockState state = level.getBlockState(neighbor);
+                Block.updateOrDestroy(state, Block.updateFromNeighbourShapes(state, level, neighbor),
+                        level, neighbor, Block.UPDATE_ALL);
+            }
+        }
     }
 
     public static boolean hasValidOffset(int x, int y, int z) {

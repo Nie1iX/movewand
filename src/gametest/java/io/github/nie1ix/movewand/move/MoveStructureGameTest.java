@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -172,6 +173,23 @@ public final class MoveStructureGameTest implements FabricGameTest {
             context.assertBlockState(SOURCE_RELATIVE.west().south(2), state -> state.equals(lever),
                     () -> "wall lever must move with its support");
             assertNoDroppedItems(context);
+            context.succeed();
+        });
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void dropsUnselectedSideAttachedBlockWhenItsSupportMoves(GameTestHelper context) {
+        context.setBlock(SOURCE_RELATIVE, Blocks.STONE);
+        context.setBlock(SOURCE_RELATIVE.east(), wallAttached(Blocks.STONE_BUTTON.defaultBlockState(), Direction.EAST));
+
+        moveSelectedBlocks(context, List.of(SOURCE_RELATIVE), 0, 0, 1, 0);
+
+        context.runAfterDelay(2, () -> {
+            context.assertBlockPresent(Blocks.AIR, SOURCE_RELATIVE.east());
+            AABB bounds = new AABB(context.absolutePos(SOURCE_RELATIVE)).inflate(2);
+            context.assertTrue(context.getLevel().getEntitiesOfClass(ItemEntity.class, bounds).stream()
+                            .anyMatch(entity -> entity.getItem().is(Items.STONE_BUTTON)),
+                    "unselected button must drop when its support moves");
             context.succeed();
         });
     }
