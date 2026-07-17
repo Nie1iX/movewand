@@ -112,8 +112,10 @@ public final class MoveService {
             return;
         }
 
-        MoveValidation validation = MoveValidator.validate(source, Set.copyOf(destinations.values()),
-                position -> level.getBlockState(position).isAir());
+        MoveValidation validation = MoveValidator.validate(source, Set.copyOf(destinations.values()), position -> {
+            BlockState state = level.getBlockState(position);
+            return state.isAir() || (!state.getFluidState().isEmpty() && !state.getFluidState().isSource());
+        });
         if (validation != MoveValidation.VALID) {
             player.displayClientMessage(Component.translatable("message.movewand.move.blocked"), true);
             return;

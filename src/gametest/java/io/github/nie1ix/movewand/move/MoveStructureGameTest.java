@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
@@ -86,6 +87,20 @@ public final class MoveStructureGameTest implements FabricGameTest {
     @GameTest(template = EMPTY_STRUCTURE)
     public void movesPointedDripstoneWhenBothPositionsHaveSupport(GameTestHelper context) {
         assertSupportedBlockMoves(context, Blocks.POINTED_DRIPSTONE.defaultBlockState(), Blocks.STONE);
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void movesIntoFlowingWater(GameTestHelper context) {
+        context.setBlock(SOURCE_RELATIVE, Blocks.STONE);
+        context.setBlock(SOURCE_RELATIVE.east(), Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, 3));
+
+        moveSelectedBlock(context, SOURCE_RELATIVE);
+
+        context.runAfterDelay(2, () -> {
+            context.assertBlockPresent(Blocks.AIR, SOURCE_RELATIVE);
+            context.assertBlockPresent(Blocks.STONE, SOURCE_RELATIVE.east());
+            context.succeed();
+        });
     }
 
     @GameTest(template = EMPTY_STRUCTURE)
