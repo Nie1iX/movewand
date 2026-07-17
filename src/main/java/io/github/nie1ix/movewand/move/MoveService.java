@@ -16,8 +16,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.tags.TagKey;
 import net.minecraft.resources.ResourceLocation;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import io.github.nie1ix.movewand.network.SelectionUpdatedPayload;
 import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.selection.BlockSelection;
 import io.github.nie1ix.movewand.selection.ServerSelectionManager;
@@ -175,7 +173,7 @@ public final class MoveService {
 
         BlockSelection updatedSelection = BlockSelection.of(destinations.values(), destinations.get(source.pivot()));
         ServerSelectionManager.replace(player, updatedSelection);
-        ServerPlayNetworking.send(player, new SelectionUpdatedPayload(updatedSelection.positions(), updatedSelection.pivot()));
+        ServerSelectionManager.sendSelectionUpdate(player);
         player.displayClientMessage(Component.translatable("message.movewand.move.success"), true);
     }
 

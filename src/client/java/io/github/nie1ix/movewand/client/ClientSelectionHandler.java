@@ -1,50 +1,35 @@
 package io.github.nie1ix.movewand.client;
 
-import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import io.github.nie1ix.movewand.registry.ModItems;
-import io.github.nie1ix.movewand.selection.SelectionEditor;
+import net.minecraft.core.BlockPos;
+import io.github.nie1ix.movewand.network.SelectionUpdatedPayload;
+import io.github.nie1ix.movewand.selection.BlockSelection;
 
 import java.util.Optional;
 
 public final class ClientSelectionHandler {
-    private static final SelectionEditor EDITOR = new SelectionEditor();
+    private static BlockSelection selection;
+    private static BlockPos pendingBoxCorner;
 
     private ClientSelectionHandler() {
     }
 
-    public static void initialize() {
-        UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> {
-            if (hand != InteractionHand.MAIN_HAND || !player.getItemInHand(hand).is(ModItems.MOVE_WAND)) {
-                return InteractionResult.PASS;
-            }
-
-            if (player.isShiftKeyDown()) {
-                EDITOR.toggleBlock(hitResult.getBlockPos());
-            } else {
-                EDITOR.selectBoxCorner(hitResult.getBlockPos());
-            }
-            TransformPreview.cancel();
-            return InteractionResult.PASS;
-        });
+    public static Optional<BlockSelection> selection() {
+        return Optional.ofNullable(selection);
     }
 
-    public static Optional<io.github.nie1ix.movewand.selection.BlockSelection> selection() {
-        return EDITOR.selection();
+    public static Optional<BlockPos> pendingBoxCorner() {
+        return Optional.ofNullable(pendingBoxCorner);
     }
 
-    public static Optional<net.minecraft.core.BlockPos> pendingBoxCorner() {
-        return EDITOR.pendingBoxCorner();
-    }
-
-    public static void replace(io.github.nie1ix.movewand.selection.BlockSelection selection) {
-        EDITOR.replace(selection);
+    public static void replace(SelectionUpdatedPayload payload) {
+        selection = payload.positions().isEmpty() ? null : new BlockSelection(payload.positions(), payload.pivot());
+        pendingBoxCorner = payload.pendingBoxCorner();
         TransformPreview.cancel();
     }
 
-    public static void clear() {
-        EDITOR.clear();
+    public static void reset() {
+        selection = null;
+        pendingBoxCorner = null;
         TransformPreview.cancel();
     }
 }

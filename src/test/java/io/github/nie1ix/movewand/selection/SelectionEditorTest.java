@@ -52,6 +52,21 @@ class SelectionEditorTest {
     }
 
     @Test
+    void togglingPairedBlocksAddsThenRemovesTheWholeGroup() {
+        SelectionEditor editor = new SelectionEditor();
+        BlockPos clickedBlock = new BlockPos(1, 2, 3);
+        Set<BlockPos> pairedBlocks = Set.of(clickedBlock, new BlockPos(1, 3, 3));
+
+        editor.toggleBlocks(pairedBlocks, clickedBlock);
+
+        assertEquals(pairedBlocks, editor.selection().orElseThrow().positions());
+
+        editor.toggleBlocks(pairedBlocks, clickedBlock);
+
+        assertTrue(editor.selection().isEmpty());
+    }
+
+    @Test
     void usesTheFirstIndividuallyAddedBlockAsThePivot() {
         SelectionEditor editor = new SelectionEditor();
         BlockPos firstBlock = new BlockPos(1, 2, 3);

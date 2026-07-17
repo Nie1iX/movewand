@@ -10,6 +10,7 @@ import io.github.nie1ix.movewand.network.SelectionUpdatedPayload;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public final class ServerSelectionManager {
@@ -25,7 +26,10 @@ public final class ServerSelectionManager {
     public static void select(ServerPlayer player, BlockPos position, boolean individualBlock) {
         SelectionEditor editor = EDITORS.computeIfAbsent(player.getUUID(), ignored -> new SelectionEditor());
         if (individualBlock) {
-            editor.toggleBlock(position);
+            editor.toggleBlocks(
+                    StructureSelection.expandPairedBlocks(Set.of(position), player.serverLevel()::getBlockState),
+                    position
+            );
             showSelectionSize(player, editor);
             sendSelectionUpdate(player, editor);
             return;
@@ -34,13 +38,16 @@ public final class ServerSelectionManager {
         if (editor.selectBoxCorner(position)) {
             if (editor.pendingBoxCorner().isPresent()) {
                 player.displayClientMessage(Component.translatable("message.movewand.selection.first_corner"), true);
-            } else {
+            } else if (expandPairedBlocks(player, editor)) {
                 showSelectionSize(player, editor);
-                sendSelectionUpdate(player, editor);
+            } else {
+                editor.clear();
+                player.displayClientMessage(Component.translatable("message.movewand.selection.too_large"), true);
             }
         } else {
             player.displayClientMessage(Component.translatable("message.movewand.selection.too_large"), true);
         }
+        sendSelectionUpdate(player, editor);
     }
 
     public static Optional<BlockSelection> selection(ServerPlayer player) {
@@ -53,6 +60,7 @@ public final class ServerSelectionManager {
 
     public static void clear(ServerPlayer player) {
         EDITORS.remove(player.getUUID());
+        sendSelectionUpdate(player, null);
     }
 
     private static void showSelectionSize(ServerPlayer player, SelectionEditor editor) {
@@ -65,10 +73,24 @@ public final class ServerSelectionManager {
         player.displayClientMessage(Component.translatable("message.movewand.selection.size", size), true);
     }
 
+    public static void sendSelectionUpdate(ServerPlayer player) {
+        sendSelectionUpdate(player, EDITORS.get(player.getUUID()));
+    }
+
+    private static boolean expandPairedBlocks(ServerPlayer player, SelectionEditor editor) {
+        return editor.selection().map(selection -> editor.replace(BlockSelection.of(
+                StructureSelection.expandPairedBlocks(selection.positions(), player.serverLevel()::getBlockState),
+                selection.pivot()
+        ))).orElse(true);
+    }
+
     private static void sendSelectionUpdate(ServerPlayer player, SelectionEditor editor) {
-        editor.selection().ifPresent(selection -> ServerPlayNetworking.send(
-                player,
-                new SelectionUpdatedPayload(selection.positions(), selection.pivot())
+        BlockSelection selection = editor == null ? null : editor.selection().orElse(null);
+        BlockPos pendingBoxCorner = editor == null ? null : editor.pendingBoxCorner().orElse(null);
+        ServerPlayNetworking.send(player, new SelectionUpdatedPayload(
+                selection == null ? Set.of() : selection.positions(),
+                selection == null ? null : selection.pivot(),
+                pendingBoxCorner
         ));
     }
 }

@@ -56,7 +56,6 @@ public final class MoveKeyBindings {
             }
             while (CLEAR_SELECTION.consumeClick()) {
                 net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new ClearSelectionPayload());
-                ClientSelectionHandler.clear();
             }
         });
     }

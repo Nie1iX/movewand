@@ -54,13 +54,24 @@ public final class SelectionEditor {
     }
 
     public void toggleBlock(BlockPos position) {
-        if (!positions.remove(position)) {
-            positions.add(position);
-            if (pivot == null) {
-                pivot = position;
+        toggleBlocks(Set.of(position), position);
+    }
+
+    public void toggleBlocks(Set<BlockPos> blocks, BlockPos pivotCandidate) {
+        if (blocks.isEmpty()) {
+            return;
+        }
+
+        if (positions.containsAll(blocks)) {
+            positions.removeAll(blocks);
+            if (!positions.contains(pivot)) {
+                pivot = positions.stream().findFirst().orElse(null);
             }
-        } else if (position.equals(pivot)) {
-            pivot = positions.stream().findFirst().orElse(null);
+        } else {
+            positions.addAll(blocks);
+            if (pivot == null) {
+                pivot = pivotCandidate;
+            }
         }
     }
 

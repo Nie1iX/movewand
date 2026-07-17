@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import io.github.nie1ix.movewand.selection.BlockSelection;
-import io.github.nie1ix.movewand.selection.StructureSelection;
 import io.github.nie1ix.movewand.move.MoveProjection;
 import io.github.nie1ix.movewand.transform.BlockStateTransform;
 import io.github.nie1ix.movewand.transform.SelectionTransform;
@@ -30,14 +29,10 @@ public final class PreviewRenderer {
             Vec3 camera = context.camera().getPosition();
             ClientSelectionHandler.pendingBoxCorner().ifPresent(corner -> renderPendingBoxCorner(context, camera, corner));
             ClientSelectionHandler.selection().ifPresent(selection -> {
-                BlockSelection expandedSelection = BlockSelection.of(
-                        StructureSelection.expandPairedBlocks(selection.positions(), context.world()::getBlockState),
-                        selection.pivot()
-                );
                 if (TransformPreview.isActive()) {
-                    renderPreview(context, expandedSelection);
+                    renderPreview(context, selection);
                 } else {
-                    renderSelection(context, expandedSelection);
+                    renderSelection(context, selection);
                 }
             });
         });
