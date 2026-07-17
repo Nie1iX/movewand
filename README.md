@@ -41,6 +41,4 @@ MoveWand — Fabric-мод для Minecraft с выживальным инстр
 
 Функциональная спецификация: [`docs/functional-spec.md`](docs/functional-spec.md).
 
-Подробный план: [`docs/plans/2026-07-15-movewand.md`](docs/plans/2026-07-15-movewand.md).
-
 Compatibility matrix: [`docs/compatibility-matrix.md`](docs/compatibility-matrix.md).
