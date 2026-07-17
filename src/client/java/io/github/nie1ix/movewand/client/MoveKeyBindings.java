@@ -30,16 +30,13 @@ public final class MoveKeyBindings {
 
     public static void initialize() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.player == null) {
+            if (client.player == null || !client.player.getMainHandItem().is(ModItems.MOVE_WAND)) {
+                discardPendingClicks();
                 return;
             }
 
             while (CANCEL.consumeClick()) {
                 TransformPreview.cancel();
-            }
-
-            if (!client.player.getMainHandItem().is(ModItems.MOVE_WAND)) {
-                return;
             }
 
             addWhenPressed(FORWARD, RelativeMove.FORWARD, client.player.getDirection());
@@ -84,6 +81,14 @@ public final class MoveKeyBindings {
     private static void addWhenPressed(KeyMapping key, RelativeMove move, net.minecraft.core.Direction horizontalView) {
         while (key.consumeClick()) {
             TransformPreview.add(move, horizontalView);
+        }
+    }
+
+    private static void discardPendingClicks() {
+        for (KeyMapping binding : all()) {
+            while (binding.consumeClick()) {
+                // Ignore MoveWand input while the player is not holding the wand.
+            }
         }
     }
 }
