@@ -49,7 +49,6 @@ public final class TransformPreview {
         }
 
         ClientPlayNetworking.send(new MoveRequestPayload(offset.getX(), offset.getY(), offset.getZ(), clockwiseTurns));
-        cancel();
     }
 
     public static void cancel() {
