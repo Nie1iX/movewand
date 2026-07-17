@@ -75,6 +75,30 @@ public final class MoveStructureGameTest implements FabricGameTest {
     }
 
     @GameTest(template = EMPTY_STRUCTURE)
+    public void doesNotMoveBedWithoutDestinationSupport(GameTestHelper context) {
+        BlockState foot = Blocks.RED_BED.defaultBlockState()
+                .setValue(BedBlock.FACING, Direction.NORTH)
+                .setValue(BedBlock.PART, BedPart.FOOT);
+        BlockState head = Blocks.RED_BED.defaultBlockState()
+                .setValue(BedBlock.FACING, Direction.NORTH)
+                .setValue(BedBlock.PART, BedPart.HEAD);
+        context.setBlock(SOURCE_RELATIVE.below(), Blocks.STONE);
+        context.setBlock(SOURCE_RELATIVE.north().below(), Blocks.STONE);
+        context.setBlock(SOURCE_RELATIVE, foot);
+        context.setBlock(SOURCE_RELATIVE.north(), head);
+
+        moveSelectedBlock(context, SOURCE_RELATIVE);
+
+        context.assertBlockState(SOURCE_RELATIVE, state -> state.equals(foot),
+                () -> "bed foot must remain when destination has no support");
+        context.assertBlockState(SOURCE_RELATIVE.north(), state -> state.equals(head),
+                () -> "bed head must remain when destination has no support");
+        context.assertBlockPresent(Blocks.AIR, SOURCE_RELATIVE.east());
+        context.assertBlockPresent(Blocks.AIR, SOURCE_RELATIVE.east().north());
+        context.succeed();
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
     public void movesFlowerWhenBothPositionsHaveSupport(GameTestHelper context) {
         assertSupportedBlockMoves(context, Blocks.DANDELION.defaultBlockState(), Blocks.DIRT);
     }

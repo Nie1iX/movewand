@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.LevelReader;
@@ -143,7 +144,8 @@ public final class MoveService {
         }
 
         LevelReader projectedLevel = MoveProjection.levelAfterMove(level, states, destinations);
-        if (states.entrySet().stream().anyMatch(entry -> !entry.getValue().canSurvive(projectedLevel, destinations.get(entry.getKey())))) {
+        if (states.entrySet().stream().anyMatch(entry -> !entry.getValue().canSurvive(projectedLevel, destinations.get(entry.getKey())))
+                || hasUnsupportedBed(states, destinations, projectedLevel)) {
             player.displayClientMessage(Component.translatable("message.movewand.move.unsurvivable"), true);
             return;
         }
@@ -197,6 +199,13 @@ public final class MoveService {
                         level, neighbor, Block.UPDATE_ALL);
             }
         }
+    }
+
+    private static boolean hasUnsupportedBed(Map<BlockPos, BlockState> states, Map<BlockPos, BlockPos> destinations,
+                                             LevelReader projectedLevel) {
+        return states.entrySet().stream()
+                .filter(entry -> entry.getValue().getBlock() instanceof BedBlock)
+                .anyMatch(entry -> !Block.canSupportCenter(projectedLevel, destinations.get(entry.getKey()).below(), Direction.UP));
     }
 
     public static boolean hasValidOffset(int x, int y, int z) {
