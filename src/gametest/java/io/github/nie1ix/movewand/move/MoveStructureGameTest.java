@@ -6,18 +6,24 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
+import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.phys.AABB;
 import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.selection.BlockSelection;
 import io.github.nie1ix.movewand.selection.ServerSelectionManager;
+import io.github.nie1ix.movewand.transform.BlockStateTransform;
 
 import java.util.List;
 
@@ -82,6 +88,95 @@ public final class MoveStructureGameTest implements FabricGameTest {
     }
 
     @GameTest(template = EMPTY_STRUCTURE)
+    public void movesWallTorchWithItsSupport(GameTestHelper context) {
+        BlockState torch = wallTorch();
+        context.setBlock(SOURCE_RELATIVE, Blocks.STONE);
+        context.setBlock(SOURCE_RELATIVE.east(), torch);
+
+        moveSelectedBlocks(context, List.of(SOURCE_RELATIVE, SOURCE_RELATIVE.east()), 0, 0, 1, 0);
+
+        context.runAfterDelay(2, () -> {
+            context.assertBlockPresent(Blocks.AIR, SOURCE_RELATIVE);
+            context.assertBlockPresent(Blocks.AIR, SOURCE_RELATIVE.east());
+            context.assertBlockPresent(Blocks.STONE, SOURCE_RELATIVE.south());
+            context.assertBlockState(SOURCE_RELATIVE.east().south(), state -> state.equals(torch),
+                    () -> "wall torch must move with its support");
+            context.succeed();
+        });
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void rotatesWallTorchWithItsSupport(GameTestHelper context) {
+        BlockState torch = wallTorch();
+        BlockState rotatedTorch = BlockStateTransform.rotateY(torch, 1);
+        context.setBlock(SOURCE_RELATIVE, Blocks.STONE);
+        context.setBlock(SOURCE_RELATIVE.east(), torch);
+
+        moveSelectedBlocks(context, List.of(SOURCE_RELATIVE, SOURCE_RELATIVE.east()), 0, 0, 0, 1);
+
+        context.runAfterDelay(2, () -> {
+            context.assertBlockPresent(Blocks.STONE, SOURCE_RELATIVE);
+            context.assertBlockPresent(Blocks.AIR, SOURCE_RELATIVE.east());
+            context.assertBlockState(SOURCE_RELATIVE.south(), state -> state.equals(rotatedTorch),
+                    () -> "wall torch must rotate with its support");
+            context.succeed();
+        });
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void doesNotDropWallTorchesWhenMovingTheirSharedSupport(GameTestHelper context) {
+        placeWallTorchesAroundSupport(context);
+
+        moveSelectedBlocks(context, wallTorchStructure(), 0, 0, 2, 0);
+
+        context.runAfterDelay(2, () -> {
+            for (Direction direction : Direction.Plane.HORIZONTAL) {
+                BlockPos destination = SOURCE_RELATIVE.relative(direction).south(2);
+                context.assertBlockState(destination, state -> state.equals(wallTorch(direction)),
+                        () -> "wall torch must move with its shared support");
+            }
+            assertNoDroppedItems(context);
+            context.succeed();
+        });
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void doesNotDropWallTorchesWhenRotatingTheirSharedSupport(GameTestHelper context) {
+        placeWallTorchesAroundSupport(context);
+
+        moveSelectedBlocks(context, wallTorchStructure(), 0, 0, 0, 1);
+
+        context.runAfterDelay(2, () -> {
+            for (Direction direction : Direction.Plane.HORIZONTAL) {
+                context.assertBlockState(SOURCE_RELATIVE.relative(direction), state -> state.equals(wallTorch(direction)),
+                        () -> "wall torch must rotate with its shared support");
+            }
+            assertNoDroppedItems(context);
+            context.succeed();
+        });
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void doesNotDropSideAttachedBlocksWhenMovingTheirSharedSupport(GameTestHelper context) {
+        BlockState button = wallAttached(Blocks.STONE_BUTTON.defaultBlockState(), Direction.EAST);
+        BlockState lever = wallAttached(Blocks.LEVER.defaultBlockState(), Direction.WEST);
+        context.setBlock(SOURCE_RELATIVE, Blocks.STONE);
+        context.setBlock(SOURCE_RELATIVE.east(), button);
+        context.setBlock(SOURCE_RELATIVE.west(), lever);
+
+        moveSelectedBlocks(context, List.of(SOURCE_RELATIVE, SOURCE_RELATIVE.east(), SOURCE_RELATIVE.west()), 0, 0, 2, 0);
+
+        context.runAfterDelay(2, () -> {
+            context.assertBlockState(SOURCE_RELATIVE.east().south(2), state -> state.equals(button),
+                    () -> "wall button must move with its support");
+            context.assertBlockState(SOURCE_RELATIVE.west().south(2), state -> state.equals(lever),
+                    () -> "wall lever must move with its support");
+            assertNoDroppedItems(context);
+            context.succeed();
+        });
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
     public void doesNotMoveSpawner(GameTestHelper context) {
         context.setBlock(SOURCE_RELATIVE, Blocks.SPAWNER);
 
@@ -117,9 +212,54 @@ public final class MoveStructureGameTest implements FabricGameTest {
 
     @SuppressWarnings("removal")
     private static void moveSelectedBlock(GameTestHelper context, BlockPos sourceRelative) {
+        moveSelectedBlocks(context, List.of(sourceRelative), 1, 0, 0, 0);
+    }
+
+    @SuppressWarnings("removal")
+    private static void moveSelectedBlocks(GameTestHelper context, List<BlockPos> sourceRelatives,
+                                           int x, int y, int z, int turns) {
         ServerPlayer player = context.makeMockServerPlayerInLevel();
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.MOVE_WAND));
-        ServerSelectionManager.replace(player, BlockSelection.of(List.of(context.absolutePos(sourceRelative))));
-        MoveService.move(player, 1, 0, 0, 0);
+        ServerSelectionManager.replace(player, BlockSelection.of(sourceRelatives.stream()
+                .map(context::absolutePos)
+                .toList()));
+        MoveService.move(player, x, y, z, turns);
+    }
+
+    private static BlockState wallTorch() {
+        return wallTorch(Direction.EAST);
+    }
+
+    private static BlockState wallTorch(Direction facing) {
+        return Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, facing);
+    }
+
+    private static BlockState wallAttached(BlockState state, Direction facing) {
+        return state
+                .setValue(FaceAttachedHorizontalDirectionalBlock.FACE, AttachFace.WALL)
+                .setValue(FaceAttachedHorizontalDirectionalBlock.FACING, facing);
+    }
+
+    private static void placeWallTorchesAroundSupport(GameTestHelper context) {
+        context.setBlock(SOURCE_RELATIVE, Blocks.STONE);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            context.setBlock(SOURCE_RELATIVE.relative(direction), wallTorch(direction));
+        }
+    }
+
+    private static List<BlockPos> wallTorchStructure() {
+        return List.of(
+                SOURCE_RELATIVE,
+                SOURCE_RELATIVE.north(),
+                SOURCE_RELATIVE.east(),
+                SOURCE_RELATIVE.south(),
+                SOURCE_RELATIVE.west()
+        );
+    }
+
+    private static void assertNoDroppedItems(GameTestHelper context) {
+        AABB bounds = new AABB(context.absolutePos(SOURCE_RELATIVE)).inflate(4);
+        context.assertTrue(context.getLevel().getEntitiesOfClass(ItemEntity.class, bounds).isEmpty(),
+                "moving attached blocks must not create item drops");
     }
 }
