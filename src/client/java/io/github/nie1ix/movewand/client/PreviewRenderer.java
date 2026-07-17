@@ -4,13 +4,17 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import io.github.nie1ix.movewand.selection.BlockSelection;
+import io.github.nie1ix.movewand.selection.StructureSelection;
+import io.github.nie1ix.movewand.move.MoveProjection;
 import io.github.nie1ix.movewand.transform.BlockStateTransform;
 import io.github.nie1ix.movewand.transform.SelectionTransform;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class PreviewRenderer {
@@ -26,10 +30,14 @@ public final class PreviewRenderer {
             Vec3 camera = context.camera().getPosition();
             ClientSelectionHandler.pendingBoxCorner().ifPresent(corner -> renderPendingBoxCorner(context, camera, corner));
             ClientSelectionHandler.selection().ifPresent(selection -> {
+                BlockSelection expandedSelection = BlockSelection.of(
+                        StructureSelection.expandPairedBlocks(selection.positions(), context.world()::getBlockState),
+                        selection.pivot()
+                );
                 if (TransformPreview.isActive()) {
-                    renderPreview(context, selection);
+                    renderPreview(context, expandedSelection);
                 } else {
-                    renderSelection(context, selection);
+                    renderSelection(context, expandedSelection);
                 }
             });
         });
@@ -38,17 +46,22 @@ public final class PreviewRenderer {
     private static void renderPreview(net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context, BlockSelection selection) {
         BlockPos offset = TransformPreview.offset();
         Map<BlockPos, BlockPos> targets = SelectionTransform.transformMap(selection, offset, TransformPreview.clockwiseTurns());
+        Map<BlockPos, BlockState> states = new LinkedHashMap<>();
+        for (BlockPos source : targets.keySet()) {
+            states.put(source, BlockStateTransform.rotateY(
+                    context.world().getBlockState(source),
+                    TransformPreview.clockwiseTurns()
+            ));
+        }
+        LevelReader projectedLevel = MoveProjection.levelAfterMove(context.world(), states, targets);
         boolean withinRange = TransformPreview.isOffsetWithinRange(offset);
         Vec3 camera = context.camera().getPosition();
 
         for (Map.Entry<BlockPos, BlockPos> entry : targets.entrySet()) {
             BlockPos target = entry.getValue();
-            BlockState state = BlockStateTransform.rotateY(
-                    context.world().getBlockState(entry.getKey()),
-                    TransformPreview.clockwiseTurns()
-            );
+            BlockState state = states.get(entry.getKey());
             boolean emptyOrOverlapping = selection.positions().contains(target) || context.world().getBlockState(target).isAir();
-            boolean valid = withinRange && emptyOrOverlapping && state.canSurvive(context.world(), target);
+            boolean valid = withinRange && emptyOrOverlapping && state.canSurvive(projectedLevel, target);
             float red = valid ? 0.1f : 1.0f;
             float green = valid ? 0.45f : 0.1f;
             float blue = valid ? 1.0f : 0.1f;

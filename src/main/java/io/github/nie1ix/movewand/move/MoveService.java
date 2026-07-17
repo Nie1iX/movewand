@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.tags.TagKey;
@@ -17,6 +18,7 @@ import io.github.nie1ix.movewand.network.SelectionUpdatedPayload;
 import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.selection.BlockSelection;
 import io.github.nie1ix.movewand.selection.ServerSelectionManager;
+import io.github.nie1ix.movewand.selection.StructureSelection;
 import io.github.nie1ix.movewand.transform.SelectionTransform;
 import io.github.nie1ix.movewand.transform.BlockStateTransform;
 
@@ -67,9 +69,10 @@ public final class MoveService {
         }
 
         ServerLevel level = player.serverLevel();
-        Set<BlockPos> positions = selected.get().positions().stream()
+        Set<BlockPos> selectedPositions = selected.get().positions().stream()
                 .filter(position -> !level.getBlockState(position).isAir())
                 .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        Set<BlockPos> positions = StructureSelection.expandPairedBlocks(selectedPositions, level::getBlockState);
         if (positions.isEmpty()) {
             player.displayClientMessage(Component.translatable("message.movewand.selection.empty"), true);
             return;
@@ -118,7 +121,8 @@ public final class MoveService {
             states.put(position, BlockStateTransform.rotateY(state, turns));
         }
 
-        if (states.entrySet().stream().anyMatch(entry -> !entry.getValue().canSurvive(level, destinations.get(entry.getKey())))) {
+        LevelReader projectedLevel = MoveProjection.levelAfterMove(level, states, destinations);
+        if (states.entrySet().stream().anyMatch(entry -> !entry.getValue().canSurvive(projectedLevel, destinations.get(entry.getKey())))) {
             player.displayClientMessage(Component.translatable("message.movewand.move.unsurvivable"), true);
             return;
         }

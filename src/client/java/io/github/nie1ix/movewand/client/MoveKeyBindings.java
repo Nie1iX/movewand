@@ -9,6 +9,8 @@ import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.network.ClearSelectionPayload;
 import io.github.nie1ix.movewand.transform.RelativeMove;
 
+import java.util.List;
+
 public final class MoveKeyBindings {
     private static final String CATEGORY = "key.categories.movewand";
     private static final KeyMapping FORWARD = register("key.movewand.move_forward", GLFW.GLFW_KEY_UP);
@@ -60,6 +62,14 @@ public final class MoveKeyBindings {
                 ClientSelectionHandler.clear();
             }
         });
+    }
+
+    public static List<KeyMapping> all() {
+        return List.of(
+                FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN,
+                ROTATE_CLOCKWISE, ROTATE_COUNTER_CLOCKWISE,
+                APPLY, CANCEL, CLEAR_SELECTION
+        );
     }
 
     private static KeyMapping register(String translationKey, int keyCode) {

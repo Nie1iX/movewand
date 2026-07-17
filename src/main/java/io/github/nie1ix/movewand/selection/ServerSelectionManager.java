@@ -4,6 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import io.github.nie1ix.movewand.network.SelectionUpdatedPayload;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +27,7 @@ public final class ServerSelectionManager {
         if (individualBlock) {
             editor.toggleBlock(position);
             showSelectionSize(player, editor);
+            sendSelectionUpdate(player, editor);
             return;
         }
 
@@ -33,6 +36,7 @@ public final class ServerSelectionManager {
                 player.displayClientMessage(Component.translatable("message.movewand.selection.first_corner"), true);
             } else {
                 showSelectionSize(player, editor);
+                sendSelectionUpdate(player, editor);
             }
         } else {
             player.displayClientMessage(Component.translatable("message.movewand.selection.too_large"), true);
@@ -54,5 +58,12 @@ public final class ServerSelectionManager {
     private static void showSelectionSize(ServerPlayer player, SelectionEditor editor) {
         int size = editor.selection().map(selection -> selection.positions().size()).orElse(0);
         player.displayClientMessage(Component.translatable("message.movewand.selection.size", size), true);
+    }
+
+    private static void sendSelectionUpdate(ServerPlayer player, SelectionEditor editor) {
+        editor.selection().ifPresent(selection -> ServerPlayNetworking.send(
+                player,
+                new SelectionUpdatedPayload(selection.positions(), selection.pivot())
+        ));
     }
 }
