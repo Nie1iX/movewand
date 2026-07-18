@@ -2,37 +2,44 @@
 
 ## Selection
 
-- `SELECT_BOX_START` / `SELECT_BOX_END` — задать прямоугольное выделение двумя точками.
-- `SELECT_BLOCK_ADD` / `SELECT_BLOCK_REMOVE` — изменить поблочное выделение.
-- `CLEAR_SELECTION` — очистить выделение.
-- `SHOW_SELECTION_OUTLINE` — показывать обводку выбранных блоков.
+- `SELECT_BOX_START` / `SELECT_BOX_END` — define a rectangular selection with two corners.
+- `SELECT_BLOCK_ADD` / `SELECT_BLOCK_REMOVE` — change an individual-block selection.
+- `CLEAR_SELECTION` — clear all selected blocks and selection feedback.
+- `SHOW_SELECTION_OUTLINE` — render the selected blocks and a pending first box corner while MoveWand is in the main hand.
+
+Beginning an individual-block selection clears a pending first box corner. Doors and beds expand the selection to include their matching half. A double chest is valid only when both halves are selected.
 
 ## Transformation
 
-- `MOVE_FORWARD` / `MOVE_BACKWARD`.
-- `MOVE_LEFT` / `MOVE_RIGHT`.
-- `MOVE_UP` / `MOVE_DOWN`.
-- `ROTATE_Y_CLOCKWISE` / `ROTATE_Y_COUNTERCLOCKWISE`.
-- `SHOW_TRANSFORM_PREVIEW` — показывать проекцию результата до применения.
-- `APPLY_TRANSFORM` — применить проверенное действие.
-- `CANCEL_TRANSFORM` — отменить preview или незавершённое действие.
-- `UNDO_LAST_TRANSFORM` — отменить последнюю успешную операцию игрока.
+- `MOVE_FORWARD` / `MOVE_BACKWARD`
+- `MOVE_LEFT` / `MOVE_RIGHT`
+- `MOVE_UP` / `MOVE_DOWN`
+- `ROTATE_Y_CLOCKWISE` / `ROTATE_Y_COUNTERCLOCKWISE`
+- `SHOW_TRANSFORM_PREVIEW` — render the projected structure before applying it.
+- `APPLY_TRANSFORM` — request a validated transform from the server.
+- `CANCEL_TRANSFORM` — cancel an active preview without changing the world.
 
-`MOVE_FORWARD`, `MOVE_BACKWARD`, `MOVE_LEFT` и `MOVE_RIGHT` определяются по горизонтальному взгляду игрока, округлённому до ближайшей стороны света. `MOVE_UP` и `MOVE_DOWN` всегда используют мировую ось `Y`. Поворот первого релиза выполняется только вокруг оси `Y` и первой точки box-выделения либо первого добавленного отдельного блока.
+`MOVE_FORWARD`, `MOVE_BACKWARD`, `MOVE_LEFT`, and `MOVE_RIGHT` use the player's horizontal view, rounded to the nearest cardinal direction. `MOVE_UP` and `MOVE_DOWN` always use world axis `Y`.
+
+The first release rotates only around axis `Y`. The pivot is the first box corner or the first individually selected block. A rotation transforms the complete selection as one structure and rotates supported state properties such as `facing` and `axis` with it.
 
 ## Validation and preview
 
-- Максимальный сдвиг pivot выделения от исходного положения — 16 блоков.
-- Операция допустима, только если каждая целевая позиция либо `air`, либо уже занята блоком из исходного выделения и будет освобождена той же атомарной операцией.
-- Вода, лава и другие не-`air` состояния не считаются пустым пространством.
-- Если хотя бы одна целевая позиция занята блоком вне исходного выделения, вся операция отклоняется без изменения мира.
-- В preview допустимые позиции подсвечиваются синим, конфликтующие — красным.
-- Проверка выполняется сервером: размер выделения, расстояние, права игрока, состояние целевых позиций и поддержка поворота блоков.
-- `REPORT_TRANSFORM_FAILURE` объясняет причину отказа игроку.
+- A selection is limited to 512 blocks.
+- The pivot may be displaced by at most 16 blocks from its original position.
+- Every target position must be empty, belong to the moving selection and be freed by the same atomic operation, or contain a non-source fluid. Source fluids are not valid destinations.
+- If any target position conflicts with a block outside the selection, the server rejects the whole transform without changing the world.
+- Blocks that require support are validated against the completed destination, not the world before the move.
+- The preview renders translucent projected blocks. Valid projected blocks are outlined in blue; conflicting or out-of-range blocks are outlined in red.
+- The server is authoritative: it validates selection size, displacement, permissions, destination state, block survival, and rotation support before applying the operation.
+- `REPORT_TRANSFORM_FAILURE` reports the rejection reason to the player and leaves the selection in place.
+
+The preview is client-side feedback. The server validation result is the final authority for every transform.
 
 ## Explicit non-goals for the first release
 
-- `COPY`, `PASTE`, удаление блоков и перезапись цели.
-- Повороты вокруг осей `X` и `Z`.
-- Неограниченный размер выделения или расстояние перемещения.
-- Обещание совместимости с каждым модовым `BlockEntity`.
+- `COPY`, `PASTE`, block deletion, or overwriting destination blocks.
+- Rotations around axes `X` and `Z`.
+- Unlimited selection size or movement distance.
+- An Undo command.
+- A compatibility guarantee for every third-party `BlockEntity`.

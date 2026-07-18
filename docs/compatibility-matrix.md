@@ -1,40 +1,42 @@
 # MoveWand Compatibility Matrix
 
-Этот документ фиксирует границу поддержки для первого public alpha. Статус `planned test` означает: код не обещает совместимость, пока сценарий не пройден в реальном Fabric `1.21.1` мире с backup.
+This document defines the support boundary for the first public alpha. `GameTest covered` means the named scenario has an automated Minecraft `GameTest`; it is not a substitute for manual multiplayer testing in a backed-up world.
 
-## Текущий contract
+## Current contract
 
-- MoveWand переносит `BlockState` и NBT `BlockEntity`; перед загрузкой NBT получает новые координаты `x`, `y`, `z`.
-- Цель должна быть `air` либо позицией исходной группы, которая освобождается этой же операцией.
-- Bedrock и блоки из `c:relocation_not_supported`, `forge:relocation_not_supported` или `create:non_movable` отклоняются до изменения мира. Неустановленные namespaces не создают dependency и просто не содержат блоков.
-- Размер выделения ограничен 512 блоками, сдвиг pivot — 16 блоками.
-- Совместимость сторонних модов не подразумевается только потому, что их блок смог пройти generic NBT path.
+- MoveWand transfers `BlockState` and `BlockEntity` NBT. Before loading NBT at the destination, it writes the destination `x`, `y`, and `z` coordinates.
+- A destination may be empty, part of the source selection that is freed by the same operation, or a non-source fluid position. Source fluids are rejected.
+- Bedrock, spawners, trial spawners, and blocks in `c:relocation_not_supported`, `forge:relocation_not_supported`, `create:non_movable`, or MoveWand's own denylist tags are rejected before the world changes. Missing tag namespaces do not add a dependency.
+- A `BlockEntity` with an NBT `Lock` value is rejected before the operation.
+- A selection is limited to 512 blocks, and its pivot may be displaced by at most 16 blocks.
+- Generic NBT transfer alone is not a compatibility promise for a third-party mod.
 
-## Матрица
+## Matrix
 
-| Область | Статус | Что проверяем | Contract до проверки |
+| Area | Status | Automated coverage | Remaining manual checks |
 | --- | --- | --- | --- |
-| Обычные vanilla blocks | code-covered | Сдвиг и поворот `BlockState`, включая `facing` и `axis` | Поддерживается |
-| Chest, barrel, shulker box | planned test | Инвентарь, custom name, lock, поворот и повторное открытие | Не обещается |
-| Furnace, smoker, blast furnace, brewing stand | planned test | Инвентарь и progress после сдвига | Не обещается |
-| Hopper, dispenser, dropper | planned test | Инвентарь, redstone, взаимодействие с соседями после операции | Не обещается |
-| Sign, lectern, banner, decorated pot | planned test | Текст, книга, pattern и custom data | Не обещается |
-| Bedrock | code-covered | Выделение и применение операции | Всегда отклоняется |
-| Блок из relocation denylist tags | code-covered | `c:`, `forge:` и Create data tags, попытка сдвига | Всегда отклоняется |
-| Create ordinary blocks | planned integration test | Kinetic network, storage, smart blocks и поворот | Не обещается; нет зависимости от Create |
-| AE2 | planned integration test | Кабели, machines, storage, network reconnect | Не обещается; нет зависимости от AE2 |
+| Ordinary vanilla blocks | GameTest covered | Translation, `BlockState` rotation, `facing`, and `axis` | Multiplayer and reconnect behavior |
+| Doors and beds | GameTest covered | Companion-part expansion, translation, rotation, and invalid bed destination rejection | Multiplayer behavior |
+| Flowers, short grass, torches, and dripstone | GameTest covered | Destination survival and unsupported-target rejection | Unusual modded support rules |
+| Chest, barrel, and shulker box | GameTest covered | Inventory NBT is preserved | Custom names, locks, rotation, reopening, and double-chest full move |
+| Furnace and brewing stand | GameTest covered | Inventory and active progress data are preserved | Smoker, blast furnace, redstone, and GUI behavior after reconnect |
+| Hopper | GameTest covered | Inventory NBT is preserved | Neighbor inventories, redstone, and transfer timing |
+| Sign and lectern | GameTest covered | Sign data and lectern book data are preserved | Interaction and rendering after reconnect |
+| Locked `BlockEntity` | GameTest covered | Rejection before world mutation | Mod-specific lock conventions |
+| Denylist-tagged blocks | GameTest covered | Rejection for relocation opt-out tags | Mod-specific tag coverage |
+| Create ordinary blocks | No integration claim | Generic denylist is recognized | Kinetic networks, storage, smart blocks, and rotation require a dedicated integration review |
+| AE2 | No integration claim | None | Cables, machines, storage, and network reconnect require a dedicated integration review |
 
-## Порядок проверки
+## Verification sequence
 
-1. Сделать backup test-world.
-2. Для каждой vanilla-строки выполнить: сдвиг, поворот Y, повторный сдвиг, выход из мира и повторный вход.
-3. Для Create проверить отдельный мир с работающим kinetic network до и после операции. Любой сбой переводит конкретный block id в denylist data pack до отдельной интеграции.
-4. Для AE2 проверить отдельную простую ME network. Если сеть не восстанавливается, не применять generic NBT workaround: использовать API стратегии перемещения AE2 только как optional integration.
-5. Проверить multiplayer: один игрок выполняет операцию, второй наблюдает итоговые blocks и inventories после reconnect.
+1. Back up the test world.
+2. For each supported vanilla scenario, test translation, `Y` rotation, a second transform, leaving the world, and rejoining it.
+3. Test multiplayer: one player performs the operation and another observes the resulting blocks and inventories after reconnecting.
+4. Test every modded integration in an isolated world. If a block is unsafe, add its block id to a denylist data pack until a dedicated integration exists.
 
 ## External contracts used as references
 
-- Movable Block Entities использует `c:relocation_not_supported` как opt-out contract. MoveWand его учитывает.
-- Create определяет `create:non_movable` и использует `forge:relocation_not_supported` для неподвижных блоков; MoveWand учитывает оба. `create:safe_nbt` относится к сохранению NBT при печати schematic, а не является общей гарантией безопасной relocation.
-- AE2 имеет API strategy с `beginMove` / `completeMove`, в котором стратегия может отказаться от переноса. Его default path создаёт новый `BlockEntity` на target через `loadStatic`; это отличается от generic MoveWand path. MoveWand не добавляет AE2 как dependency до появления проверенной optional integration.
-- WorldEdit перемещает selection только по явному `-s`; MoveWand всегда перемещает selection после успешной операции. Это намеренное UX-решение, поскольку жезл нужен для последовательной правки одной группы.
+- Movable Block Entities uses `c:relocation_not_supported` as an opt-out contract; MoveWand respects it.
+- Create defines `create:non_movable` and uses `forge:relocation_not_supported` for blocks that must not move; MoveWand respects both. `create:safe_nbt` concerns schematic printing and is not a general relocation guarantee.
+- AE2 exposes a move strategy based on `beginMove` / `completeMove`. Its default path creates a new `BlockEntity` at the target through `loadStatic`, which differs from MoveWand's generic NBT path. MoveWand has no AE2 dependency until an optional integration is verified.
+- WorldEdit moves a selection only with explicit `-s`. MoveWand always moves its selection after a successful operation, because the wand is intended for sequential adjustments to the same group.
