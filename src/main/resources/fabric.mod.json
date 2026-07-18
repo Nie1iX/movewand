@@ -3,6 +3,7 @@
   "id": "movewand",
   "version": "${version}",
   "name": "MoveWand",
+  "icon": "assets/movewand/icon.png",
   "description": "A survival tool for safely moving and rotating existing structures.",
   "authors": [
     "Nie1iX"
