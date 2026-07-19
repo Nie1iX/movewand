@@ -27,7 +27,10 @@ Fabric and NeoForge are independent Gradle projects that share the code in `src/
 ./gradlew -p neoforge build
 ```
 
-The resulting JARs are written to `fabric/build/libs/` and `neoforge/build/libs/` respectively.
+The resulting JARs are written to `fabric/build/libs/` and `neoforge/build/libs/` respectively:
+
+- `movewand-fabric-<mod-version>+mc<minecraft-version>.jar`
+- `movewand-neoforge-<mod-version>+mc<minecraft-version>.jar`
 
 ## Crafting
 

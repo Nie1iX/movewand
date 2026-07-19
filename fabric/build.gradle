@@ -8,11 +8,11 @@ repositories {
 	}
 }
 
-version = project.mod_version
+version = "${project.mod_version}+mc${project.minecraft_version}"
 group = project.mod_group
 
 base {
-	archivesName = project.mod_id
+	archivesName = "${project.mod_id}-fabric"
 }
 
 loom {
@@ -60,7 +60,7 @@ def resourceProperties = [
 	mod_id           : project.mod_id,
 	mod_license      : project.mod_license,
 	mod_name         : project.mod_name,
-	version          : project.version,
+	version          : project.mod_version,
 ]
 
 processResources {
