@@ -9,7 +9,11 @@ repositories {
 }
 
 version = project.mod_version
-group = project.maven_group
+group = project.mod_group
+
+base {
+	archivesName = project.mod_id
+}
 
 loom {
 	splitEnvironmentSourceSets()
@@ -48,11 +52,21 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-processResources {
-	inputs.property 'version', project.version
+def resourceProperties = [
+	minecraft_version: project.minecraft_version,
+	mod_author       : project.mod_author,
+	mod_description  : project.mod_description,
+	mod_icon         : project.mod_icon,
+	mod_id           : project.mod_id,
+	mod_license      : project.mod_license,
+	mod_name         : project.mod_name,
+	version          : project.version,
+]
 
+processResources {
+	inputs.properties resourceProperties
 	filesMatching('fabric.mod.json') {
-		expand version: project.version
+		expand resourceProperties
 	}
 }
 

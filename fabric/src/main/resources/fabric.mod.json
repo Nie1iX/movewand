@@ -1,13 +1,14 @@
 {
   "schemaVersion": 1,
-  "id": "movewand",
+  "id": "${mod_id}",
   "version": "${version}",
-  "name": "MoveWand",
-  "icon": "assets/movewand/icon.png",
-  "description": "A survival tool for safely moving and rotating existing structures.",
+  "name": "${mod_name}",
+  "icon": "${mod_icon}",
+  "description": "${mod_description}",
   "authors": [
-    "Nie1iX"
+    "${mod_author}"
   ],
+  "license": "${mod_license}",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -25,7 +26,7 @@
   ],
   "depends": {
     "fabricloader": ">=0.16.0",
-    "minecraft": "1.21.1",
+    "minecraft": "${minecraft_version}",
     "java": ">=21",
     "fabric-api": "*"
   }

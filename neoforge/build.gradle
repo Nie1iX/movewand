@@ -4,10 +4,10 @@ plugins {
 }
 
 version = mod_version
-group = mod_group_id
+group = mod_group
 
 base {
-    archivesName = 'movewand-neoforge'
+    archivesName = "${mod_id}-neoforge"
 }
 
 java {
@@ -73,6 +73,9 @@ tasks.withType(ProcessResources).configureEach {
             mod_name               : mod_name,
             mod_license            : mod_license,
             mod_version            : mod_version,
+            mod_author             : mod_author,
+            mod_description        : mod_description,
+            mod_icon               : mod_icon,
     ]
     inputs.properties replaceProperties
     filesMatching('META-INF/neoforge.mods.toml') {
