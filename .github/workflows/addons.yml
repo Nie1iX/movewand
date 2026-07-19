@@ -2,7 +2,7 @@ name: Addons
 
 on:
   push:
-    branches: [main]
+    branches: [1.21.1]
     paths:
       - 'addons/**'
       - 'common/src/main/java/io/github/nie1ix/movewand/move/integration/**'
@@ -12,7 +12,7 @@ on:
       - 'gradle/**'
       - '.github/workflows/addons.yml'
   pull_request:
-    branches: [main]
+    branches: [1.21.1]
     paths:
       - 'addons/**'
       - 'common/src/main/java/io/github/nie1ix/movewand/move/integration/**'
