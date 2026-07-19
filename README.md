@@ -1,21 +1,33 @@
 # MoveWand
 
-MoveWand is a Fabric mod that adds a survival-friendly tool for safely moving and rotating existing structures.
+MoveWand is a Minecraft mod for Fabric and NeoForge that adds a survival-friendly tool for safely moving and rotating existing structures.
 
 It is not a WorldEdit replacement and it does not copy or paste buildings. Use the wand to correct a mechanism's position, free some space, or rotate part of a build without dismantling and rebuilding it by hand.
 
 ## Requirements
 
 - Minecraft `1.21.1`
-- Fabric Loader `0.16` or newer
-- Fabric API for Minecraft `1.21.1`
 - Java 21
+- One supported loader:
+  - Fabric Loader `0.16` or newer and Fabric API for Minecraft `1.21.1`
+  - NeoForge `21.1.235`
 
 ## Installation
 
-1. Install Fabric Loader and Fabric API for Minecraft `1.21.1`.
-2. Place the MoveWand JAR in the instance's `mods` directory.
-3. Launch the game with Java 21.
+1. Install either Fabric Loader with Fabric API, or NeoForge, for Minecraft `1.21.1`.
+2. Place the matching MoveWand JAR in the instance's `mods` directory.
+3. Launch the game with Java 21. Do not install both loader variants in one instance.
+
+## Building
+
+Fabric and NeoForge are independent Gradle projects that share the code in `src/main`.
+
+```bash
+./gradlew -p fabric build
+./gradlew -p neoforge build
+```
+
+The resulting JARs are written to `fabric/build/libs/` and `neoforge/build/libs/` respectively.
 
 ## Crafting
 
@@ -59,6 +71,6 @@ MoveWand preserves `BlockState` and transfers `BlockEntity` data through NBT. Th
 - No copying, pasting, deleting, destination replacement, or mass building.
 - Only 90-degree rotations around the vertical `Y` axis.
 - No Undo command in the current release scope.
-- The first supported runtime is Fabric for Minecraft `1.21.1` on Java 21. Other Minecraft versions can be considered after this core is verified.
+- The supported runtimes are Fabric and NeoForge for Minecraft `1.21.1` on Java 21. Other Minecraft versions, if supported, are released as separate artifacts.
 
 See the [functional specification](docs/functional-spec.md) and [compatibility matrix](docs/compatibility-matrix.md) for the detailed contract.
