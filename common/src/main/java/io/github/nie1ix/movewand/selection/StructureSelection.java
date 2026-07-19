@@ -8,6 +8,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Function;
@@ -38,6 +39,6 @@ public final class StructureSelection {
                 }
             }
         }
-        return Set.copyOf(expanded);
+        return Collections.unmodifiableSet(expanded);
     }
 }

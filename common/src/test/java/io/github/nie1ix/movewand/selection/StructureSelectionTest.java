@@ -11,10 +11,13 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 class StructureSelectionTest {
     @Test
@@ -47,5 +50,25 @@ class StructureSelectionTest {
         Set<BlockPos> expanded = StructureSelection.expandPairedBlocks(Set.of(foot), Map.of(foot, footState, head, headState)::get);
 
         assertEquals(Set.of(foot, head), expanded);
+    }
+
+    @Test
+    void preservesPositionOrderWhenNoPairsAreAdded() {
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
+        List<BlockPos> positions = List.of(
+                new BlockPos(4, 0, 0),
+                new BlockPos(1, 0, 0),
+                new BlockPos(3, 0, 0),
+                new BlockPos(0, 0, 0),
+                new BlockPos(2, 0, 0)
+        );
+
+        Set<BlockPos> expanded = StructureSelection.expandPairedBlocks(
+                new LinkedHashSet<>(positions),
+                ignored -> Blocks.AIR.defaultBlockState()
+        );
+
+        assertIterableEquals(positions, expanded);
     }
 }

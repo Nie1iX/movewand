@@ -3,6 +3,7 @@ package io.github.nie1ix.movewand.selection;
 import net.minecraft.core.BlockPos;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -12,7 +13,7 @@ public record BlockSelection(Set<BlockPos> positions, BlockPos pivot) {
     }
 
     public BlockSelection {
-        positions = Set.copyOf(positions);
+        positions = Collections.unmodifiableSet(new LinkedHashSet<>(positions));
         if (positions.isEmpty()) {
             throw new IllegalArgumentException("Selection must contain at least one block");
         }
