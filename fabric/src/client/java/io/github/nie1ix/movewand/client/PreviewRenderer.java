@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import io.github.nie1ix.movewand.registry.ModItems;
+import io.github.nie1ix.movewand.move.MoveValidator;
 import io.github.nie1ix.movewand.selection.BlockSelection;
 import io.github.nie1ix.movewand.move.MoveProjection;
 import io.github.nie1ix.movewand.transform.BlockStateTransform;
@@ -196,15 +197,16 @@ public final class PreviewRenderer {
     private static void renderSelection(net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context, BlockSelection selection) {
         Vec3 camera = context.camera().getPosition();
         for (BlockPos position : selection.positions()) {
+            boolean unmovable = MoveValidator.isUnmovable(context.world().getBlockState(position));
             AABB box = new AABB(position).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
             LevelRenderer.renderLineBox(
                     context.matrixStack(),
                     context.consumers().getBuffer(RenderType.lines()),
                     box,
-                    0.2f,
-                    0.8f,
-                    1.0f,
-                    0.45f
+                    unmovable ? 1.0f : 0.2f,
+                    unmovable ? 0.25f : 0.8f,
+                    unmovable ? 0.05f : 1.0f,
+                    unmovable ? 0.8f : 0.45f
             );
         }
     }

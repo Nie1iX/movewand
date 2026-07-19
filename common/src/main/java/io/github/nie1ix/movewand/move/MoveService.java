@@ -2,7 +2,6 @@ package io.github.nie1ix.movewand.move;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -14,8 +13,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.ChestType;
-import net.minecraft.tags.TagKey;
-import net.minecraft.resources.ResourceLocation;
 import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.selection.BlockSelection;
 import io.github.nie1ix.movewand.selection.ServerSelectionManager;
@@ -36,24 +33,6 @@ import java.util.Set;
 
 public final class MoveService {
     public static final int MAX_OFFSET_DISTANCE = 16;
-
-    // Optional compatibility tags. Referencing an absent namespace does not add a mod dependency.
-    private static final TagKey<Block> RELOCATION_NOT_SUPPORTED = TagKey.create(
-            Registries.BLOCK,
-            ResourceLocation.fromNamespaceAndPath("c", "relocation_not_supported")
-    );
-    private static final TagKey<Block> MOVEWAND_RELOCATION_NOT_SUPPORTED = TagKey.create(
-            Registries.BLOCK,
-            ResourceLocation.fromNamespaceAndPath("movewand", "relocation_not_supported")
-    );
-    private static final TagKey<Block> CREATE_NON_MOVABLE = TagKey.create(
-            Registries.BLOCK,
-            ResourceLocation.fromNamespaceAndPath("create", "non_movable")
-    );
-    private static final TagKey<Block> FORGE_RELOCATION_NOT_SUPPORTED = TagKey.create(
-            Registries.BLOCK,
-            ResourceLocation.fromNamespaceAndPath("forge", "relocation_not_supported")
-    );
 
     private MoveService() {
     }
@@ -99,13 +78,7 @@ public final class MoveService {
 
         Optional<BlockState> unmovableState = source.positions().stream()
                 .map(level::getBlockState)
-                .filter(state -> state.is(Blocks.BEDROCK)
-                    || state.is(Blocks.SPAWNER)
-                    || state.is(Blocks.TRIAL_SPAWNER)
-                    || state.is(RELOCATION_NOT_SUPPORTED)
-                    || state.is(MOVEWAND_RELOCATION_NOT_SUPPORTED)
-                    || state.is(CREATE_NON_MOVABLE)
-                    || state.is(FORGE_RELOCATION_NOT_SUPPORTED))
+                .filter(MoveValidator::isUnmovable)
                 .findFirst();
         if (unmovableState.isPresent()) {
             displayUnmovableBlock(player, unmovableState.get());

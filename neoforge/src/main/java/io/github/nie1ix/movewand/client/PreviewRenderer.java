@@ -3,6 +3,7 @@ package io.github.nie1ix.movewand.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.nie1ix.movewand.move.MoveProjection;
+import io.github.nie1ix.movewand.move.MoveValidator;
 import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.selection.BlockSelection;
 import io.github.nie1ix.movewand.transform.BlockStateTransform;
@@ -51,7 +52,7 @@ public final class PreviewRenderer {
             if (TransformPreview.isActive()) {
                 renderPreview(event.getPoseStack(), buffers, client, camera, selection);
             } else {
-                renderSelection(event.getPoseStack(), buffers, camera, selection);
+                renderSelection(event.getPoseStack(), buffers, client, camera, selection);
             }
         });
         buffers.endBatch();
@@ -138,10 +139,25 @@ public final class PreviewRenderer {
         LevelRenderer.renderLineBox(matrices, buffers.getBuffer(RenderType.lines()), box, 1.0f, 0.75f, 0.1f, 1.0f);
     }
 
-    private static void renderSelection(PoseStack matrices, MultiBufferSource buffers, Vec3 camera, BlockSelection selection) {
+    private static void renderSelection(
+            PoseStack matrices,
+            MultiBufferSource buffers,
+            Minecraft client,
+            Vec3 camera,
+            BlockSelection selection
+    ) {
         for (BlockPos position : selection.positions()) {
+            boolean unmovable = MoveValidator.isUnmovable(client.level.getBlockState(position));
             AABB box = new AABB(position).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
-            LevelRenderer.renderLineBox(matrices, buffers.getBuffer(RenderType.lines()), box, 0.2f, 0.8f, 1.0f, 0.45f);
+            LevelRenderer.renderLineBox(
+                    matrices,
+                    buffers.getBuffer(RenderType.lines()),
+                    box,
+                    unmovable ? 1.0f : 0.2f,
+                    unmovable ? 0.25f : 0.8f,
+                    unmovable ? 0.05f : 1.0f,
+                    unmovable ? 0.8f : 0.45f
+            );
         }
     }
 
