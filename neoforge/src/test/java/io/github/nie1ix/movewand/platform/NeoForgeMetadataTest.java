@@ -17,6 +17,7 @@ class NeoForgeMetadataTest {
         String metadata = new String(input.readAllBytes(), StandardCharsets.UTF_8);
 
         assertTrue(metadata.contains("modId=\"movewand\""));
+        assertTrue(metadata.contains("license=\"MIT\""));
         assertTrue(metadata.contains("logoFile=\"assets/movewand/icon.png\""));
         assertTrue(metadata.contains("logoBlur=false"));
     }

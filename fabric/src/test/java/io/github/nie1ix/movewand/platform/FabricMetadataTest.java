@@ -18,7 +18,7 @@ class FabricMetadataTest {
 
         assertTrue(metadata.contains("\"id\": \"movewand\""));
         assertTrue(metadata.contains("\"name\": \"MoveWand\""));
-        assertTrue(metadata.contains("\"license\": \"All Rights Reserved\""));
+        assertTrue(metadata.contains("\"license\": \"MIT\""));
         assertTrue(metadata.contains("\"icon\": \"assets/movewand/icon.png\""));
     }
 }
