@@ -18,6 +18,8 @@ It is not a WorldEdit replacement and it does not copy or paste buildings. Use t
 2. Place the matching MoveWand JAR in the instance's `mods` directory.
 3. Launch the game with Java 21. Do not install both loader variants in one instance.
 
+For Oritech `1.2.9`, also install the matching `movewand-oritech` JAR alongside MoveWand and Oritech. The addon expands a selected Oritech multiblock to its controller and cores, then updates their saved coordinate references.
+
 ## Building
 
 Fabric and NeoForge are subprojects of one root Gradle build. Their shared source code is in `common/src`.
@@ -26,10 +28,23 @@ Fabric and NeoForge are subprojects of one root Gradle build. Their shared sourc
 ./gradlew build
 ```
 
-The production JARs are written to `build/mods/`:
+This builds only MoveWand. Build every optional integration with:
+
+```bash
+./gradlew buildAddons
+```
+
+MoveWand JARs are written to `build/mods/`:
 
 - `movewand-fabric-<mod-version>+mc<minecraft-version>.jar`
 - `movewand-neoforge-<mod-version>+mc<minecraft-version>.jar`
+
+Addon JARs are written to `build/addons/`:
+
+- `movewand-oritech-fabric-<addon-version>+mc<minecraft-version>.jar`
+- `movewand-oritech-neoforge-<addon-version>+mc<minecraft-version>.jar`
+
+Addons have their own version because they can be released independently of MoveWand. Each addon declares the compatible MoveWand version range in its loader metadata.
 
 ## Crafting
 
@@ -66,7 +81,7 @@ All bindings can be changed in Minecraft Controls. With Mod Menu installed, Move
 
 The first box corner, or the first individually selected block, becomes the pivot. After a successful operation the server updates the selection and pivot to the structure's new coordinates, so the next operation continues from the moved group.
 
-MoveWand preserves `BlockState` and transfers `BlockEntity` data through NBT. This is best effort for third-party blocks: a mod that stores external references to old coordinates can require a dedicated integration.
+MoveWand preserves `BlockState` and transfers `BlockEntity` data through NBT. This is best effort for third-party blocks: a mod that stores external references to old coordinates can require a dedicated integration. Integrations are separate loader-specific addons and do not add a runtime dependency to the base mod.
 
 ## Scope
 

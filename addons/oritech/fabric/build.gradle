@@ -1,0 +1,121 @@
+plugins {
+    id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+}
+
+repositories {
+    maven {
+        url = 'https://api.modrinth.com/maven'
+    }
+}
+
+base {
+    archivesName = "${mod_id}-oritech-fabric"
+}
+
+loom {
+    splitEnvironmentSourceSets()
+
+    mods {
+        movewandOritech {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = 'movewand-oritech-gametest'
+        enableClientGameTests = false
+        eula = true
+    }
+}
+
+sourceSets.main.java.srcDir '../src/main/java'
+sourceSets.test.java.srcDir '../src/test/java'
+sourceSets.gametest.java.srcDir '../src/gametest/java'
+sourceSets.gametest.resources.srcDir '../src/gametest/resources'
+
+def oritechDependency = 'maven.modrinth:oritech:5JKsraqG'
+
+configurations {
+    oritechGameTest {
+        canBeConsumed = false
+        canBeResolved = true
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    // Fabric 1.21.1 runtime required by Oritech 1.2.9.
+    modImplementation oritechDependency
+    modImplementation 'maven.modrinth:architectury-api:Wto0RchG'
+    modImplementation 'maven.modrinth:geckolib:dnJdtm0u'
+    modImplementation 'maven.modrinth:athena-ctm:JfyYsWKP'
+    modImplementation 'maven.modrinth:forge-config-api-port:N5qzq0XV'
+    runtimeOnly files(rootProject.project(':fabric').sourceSets.main.output)
+    oritechGameTest oritechDependency
+    implementation 'com.electronwill.night-config:core:3.8.1'
+    implementation 'com.electronwill.night-config:toml:3.8.1'
+    compileOnly files(rootProject.project(':fabric').sourceSets.main.output)
+
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation files(rootProject.project(':fabric').sourceSets.main.output)
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.register('extractOritechEnergy', Copy) {
+    from { configurations.oritechGameTest.collect { zipTree(it) } }
+    include 'META-INF/jars/energy-4.1.0.jar'
+    eachFile { path = name }
+    includeEmptyDirs = false
+    into layout.buildDirectory.dir('run/gameTest/mods')
+}
+
+tasks.named('runGameTest') {
+    dependsOn 'extractOritechEnergy'
+}
+
+def resourceProperties = [
+        minecraft_version       : project.minecraft_version,
+        movewand_version_range  : ">=${parent.movewandMinVersion} <${parent.movewandMaxVersion}",
+        version                 : project.version,
+]
+
+processResources {
+    inputs.properties resourceProperties
+    filesMatching('fabric.mod.json') {
+        expand resourceProperties
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.named('remapJar') {
+    destinationDirectory.set(rootProject.layout.buildDirectory.dir('addons'))
+}
+
+tasks.named('remapSourcesJar') {
+    destinationDirectory.set(rootProject.layout.buildDirectory.dir('addons'))
+}
+
+def addonBuild = tasks.replace('build')
+addonBuild.setDependsOn([])
+addonBuild.group = 'build'
+addonBuild.description = 'Use buildAddons to build optional integration addons.'

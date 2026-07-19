@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import io.github.nie1ix.movewand.move.integration.MoveIntegrations;
 import io.github.nie1ix.movewand.network.SelectionUpdatedPayload;
 
 import java.util.HashMap;
@@ -27,7 +28,10 @@ public final class ServerSelectionManager {
         SelectionEditor editor = EDITORS.computeIfAbsent(player.getUUID(), ignored -> new SelectionEditor());
         if (individualBlock) {
             editor.toggleBlocks(
-                    StructureSelection.expandPairedBlocks(Set.of(position), player.serverLevel()::getBlockState),
+                    MoveIntegrations.expandSelection(
+                            player.serverLevel(),
+                            StructureSelection.expandPairedBlocks(Set.of(position), player.serverLevel()::getBlockState)
+                    ),
                     position
             );
             showSelectionSize(player, editor);
@@ -65,9 +69,9 @@ public final class ServerSelectionManager {
 
     private static void showSelectionSize(ServerPlayer player, SelectionEditor editor) {
         int size = editor.selection()
-                .map(selection -> StructureSelection.expandPairedBlocks(
-                        selection.positions(),
-                        player.serverLevel()::getBlockState
+                .map(selection -> MoveIntegrations.expandSelection(
+                        player.serverLevel(),
+                        StructureSelection.expandPairedBlocks(selection.positions(), player.serverLevel()::getBlockState)
                 ).size())
                 .orElse(0);
         player.displayClientMessage(selectionSizeMessage(size), true);
@@ -83,7 +87,10 @@ public final class ServerSelectionManager {
 
     private static boolean expandPairedBlocks(ServerPlayer player, SelectionEditor editor) {
         return editor.selection().map(selection -> editor.replace(BlockSelection.of(
-                StructureSelection.expandPairedBlocks(selection.positions(), player.serverLevel()::getBlockState),
+                MoveIntegrations.expandSelection(
+                        player.serverLevel(),
+                        StructureSelection.expandPairedBlocks(selection.positions(), player.serverLevel()::getBlockState)
+                ),
                 selection.pivot()
         ))).orElse(true);
     }

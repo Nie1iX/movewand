@@ -10,6 +10,7 @@ This document defines the support boundary for the first public alpha. `GameTest
 - A `BlockEntity` with an NBT `Lock` value is rejected before the operation.
 - A selection is limited to 512 blocks, and its pivot may be displaced by at most 16 blocks.
 - Generic NBT transfer alone is not a compatibility promise for a third-party mod.
+- Optional integrations can expand a selection and rewrite captured `BlockEntity` NBT before it is restored. They are distributed as separate loader-specific addons.
 
 ## Matrix
 
@@ -25,6 +26,7 @@ This document defines the support boundary for the first public alpha. `GameTest
 | Item frames and paintings | GameTest covered | Item-frame translation and rotation; 1×1 painting translation | Glow item frames, map items, paintings of every size, and multiplayer rendering |
 | Locked `BlockEntity` | GameTest covered | Rejection before world mutation | Mod-specific lock conventions |
 | Denylist-tagged blocks | GameTest covered | Rejection for relocation opt-out tags | Mod-specific tag coverage |
+| Oritech `1.2.9` multiblocks | Addon available | GameTest: controller/core selection expansion and coordinate-reference NBT rewrite | Translation, rotation, GUI, recipes, reconnect, and multiplayer on Fabric and NeoForge |
 | Create ordinary blocks | No integration claim | Generic denylist is recognized | Kinetic networks, storage, smart blocks, and rotation require a dedicated integration review |
 | AE2 | No integration claim | None | Cables, machines, storage, and network reconnect require a dedicated integration review |
 
@@ -49,6 +51,7 @@ Run this checklist on both Fabric and NeoForge in a backed-up world. For every s
 - [ ] Fluids and terrain: move into flowing water, near source water and lava, and across uneven terrain; source fluid positions must still be rejected.
 - [ ] Persistence and multiplayer: reconnect after a move; have another player observe the operation; repeat with both players holding or viewing the same container and item frame.
 - [ ] Modded blocks: test each installed mod in a separate world before using it in survival. A passed vanilla case does not imply third-party compatibility.
+- [ ] Oritech `1.2.9`: with the matching MoveWand Oritech addon installed, select only one controller or core of each tested multiblock. Verify that all of its cores are added to the selection, then test translation, rotation, GUI interaction, active processing, reconnect, and multiplayer observation.
 
 ## External contracts used as references
 

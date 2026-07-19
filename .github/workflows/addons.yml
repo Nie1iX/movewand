@@ -1,0 +1,52 @@
+name: Addons
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'addons/**'
+      - 'common/src/main/java/io/github/nie1ix/movewand/move/integration/**'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle.properties'
+      - 'gradle/**'
+      - '.github/workflows/addons.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'addons/**'
+      - 'common/src/main/java/io/github/nie1ix/movewand/move/integration/**'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle.properties'
+      - 'gradle/**'
+      - '.github/workflows/addons.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Build and test add-ons
+        run: ./gradlew buildAddons :addons:oritech:fabric:runGameTest --no-daemon --max-workers=1 --console=plain
+
+      - name: Upload add-on JARs
+        uses: actions/upload-artifact@v4
+        with:
+          name: movewand-addons-mc1.21.1
+          path: |
+            build/addons/*.jar
+            !build/addons/*-sources.jar
+          if-no-files-found: error

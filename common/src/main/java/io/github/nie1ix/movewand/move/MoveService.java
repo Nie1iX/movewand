@@ -17,6 +17,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.phys.AABB;
 import io.github.nie1ix.movewand.registry.ModItems;
+import io.github.nie1ix.movewand.move.integration.MoveContext;
+import io.github.nie1ix.movewand.move.integration.MoveIntegration;
+import io.github.nie1ix.movewand.move.integration.MoveIntegrations;
 import io.github.nie1ix.movewand.selection.BlockSelection;
 import io.github.nie1ix.movewand.selection.ServerSelectionManager;
 import io.github.nie1ix.movewand.selection.StructureSelection;
@@ -65,13 +68,18 @@ public final class MoveService {
         Set<BlockPos> selectedPositions = selected.get().positions().stream()
                 .filter(position -> !level.getBlockState(position).isAir())
                 .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
-        if (selectsOneHalfOfDoubleChest(selectedPositions, level)) {
-            player.displayClientMessage(Component.translatable("message.movewand.move.double_chest"), true);
-            return;
-        }
         Set<BlockPos> positions = StructureSelection.expandPairedBlocks(selectedPositions, level::getBlockState);
+        List<MoveIntegration> integrations = MoveIntegrations.all();
+        positions = MoveIntegrations.expandSelection(level, positions);
+        positions = positions.stream()
+                .filter(position -> !level.getBlockState(position).isAir())
+                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
         if (positions.isEmpty()) {
             player.displayClientMessage(Component.translatable("message.movewand.selection.empty"), true);
+            return;
+        }
+        if (selectsOneHalfOfDoubleChest(positions, level)) {
+            player.displayClientMessage(Component.translatable("message.movewand.move.double_chest"), true);
             return;
         }
 
@@ -123,6 +131,11 @@ public final class MoveService {
             states.put(position, BlockStateTransform.rotateY(state, turns));
         }
 
+        MoveContext moveContext = new MoveContext(level, destinations, blockEntityData, turns);
+        for (MoveIntegration integration : integrations) {
+            integration.transformBlockEntityData(moveContext);
+        }
+
         LevelReader projectedLevel = MoveProjection.levelAfterMove(level, states, destinations);
         if (states.entrySet().stream().anyMatch(entry -> !entry.getValue().canSurvive(projectedLevel, destinations.get(entry.getKey())))) {
             player.displayClientMessage(Component.translatable("message.movewand.move.unsurvivable"), true);
@@ -158,6 +171,9 @@ public final class MoveService {
         }
         for (BlockPos position : destinations.values()) {
             level.updateNeighborsAt(position, level.getBlockState(position).getBlock());
+        }
+        for (MoveIntegration integration : integrations) {
+            integration.afterMove(moveContext);
         }
 
         BlockSelection updatedSelection = BlockSelection.of(destinations.values(), destinations.get(source.pivot()));

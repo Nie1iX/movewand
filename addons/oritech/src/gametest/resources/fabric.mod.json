@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "movewand-oritech-gametest",
+  "version": "1.0.0",
+  "name": "MoveWand Oritech Game Tests",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-gametest": [
+      "io.github.nie1ix.movewand.oritech.OritechMoveGameTest"
+    ]
+  }
+}

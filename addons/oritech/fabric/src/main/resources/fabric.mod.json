@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "movewand-oritech",
+  "version": "${version}",
+  "name": "MoveWand Oritech",
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.nie1ix.movewand.oritech.fabric.MoveWandOritechFabric"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "${minecraft_version}",
+    "java": ">=21",
+    "fabric-api": "*",
+    "movewand": "${movewand_version_range}",
+    "oritech": "*"
+  }
+}

@@ -1,0 +1,5 @@
+tasks.register('buildAddons') {
+    group = 'build'
+    description = 'Builds all optional integration addons.'
+    dependsOn childProjects.values().collect { "${it.path}:buildAddon" }
+}

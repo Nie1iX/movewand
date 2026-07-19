@@ -1,0 +1,16 @@
+ext {
+    addonVersion = '0.1.0-SNAPSHOT'
+    movewandMinVersion = '1.0.0'
+    movewandMaxVersion = '2.0.0'
+}
+
+subprojects {
+    version = "${parent.addonVersion}+mc${rootProject.minecraft_version}"
+}
+
+tasks.register('buildAddon') {
+    group = 'build'
+    description = 'Builds the Oritech integration addon.'
+    dependsOn ':addons:oritech:fabric:assemble', ':addons:oritech:fabric:check'
+    dependsOn ':addons:oritech:neoforge:assemble', ':addons:oritech:neoforge:check'
+}
