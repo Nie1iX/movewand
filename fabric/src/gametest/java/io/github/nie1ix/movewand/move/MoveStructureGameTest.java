@@ -3,9 +3,13 @@ package io.github.nie1ix.movewand.move;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.entity.decoration.Painting;
+import net.minecraft.world.entity.decoration.PaintingVariants;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -114,6 +118,62 @@ public final class MoveStructureGameTest implements FabricGameTest {
     @GameTest(template = EMPTY_STRUCTURE)
     public void movesPointedDripstoneWhenBothPositionsHaveSupport(GameTestHelper context) {
         assertSupportedBlockMoves(context, Blocks.POINTED_DRIPSTONE.defaultBlockState(), Blocks.STONE);
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void movesItemFrameWithSelectedSupport(GameTestHelper context) {
+        context.setBlock(SOURCE_RELATIVE, Blocks.STONE);
+        ItemFrame itemFrame = new ItemFrame(context.getLevel(), context.absolutePos(SOURCE_RELATIVE), Direction.NORTH);
+        context.getLevel().addFreshEntity(itemFrame);
+
+        moveSelectedBlock(context, SOURCE_RELATIVE);
+
+        context.runAfterDelay(2, () -> {
+            context.assertTrue(itemFrame.getPos().equals(context.absolutePos(SOURCE_RELATIVE.east())),
+                    "item frame must move with its selected support");
+            assertNoDroppedItems(context);
+            context.succeed();
+        });
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void rotatesItemFrameWithSelectedSupport(GameTestHelper context) {
+        context.setBlock(SOURCE_RELATIVE, Blocks.STONE);
+        ItemFrame itemFrame = new ItemFrame(context.getLevel(), context.absolutePos(SOURCE_RELATIVE), Direction.NORTH);
+        context.getLevel().addFreshEntity(itemFrame);
+
+        moveSelectedBlocks(context, List.of(SOURCE_RELATIVE), 0, 0, 0, 1);
+
+        context.runAfterDelay(2, () -> {
+            context.assertTrue(itemFrame.getPos().equals(context.absolutePos(SOURCE_RELATIVE)),
+                    "item frame must keep its support position when rotating in place");
+            context.assertTrue(itemFrame.getDirection() == Direction.EAST,
+                    "item frame must rotate with its selected support");
+            assertNoDroppedItems(context);
+            context.succeed();
+        });
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void movesPaintingWithSelectedSupport(GameTestHelper context) {
+        context.setBlock(SOURCE_RELATIVE, Blocks.STONE);
+        Painting painting = new Painting(
+                context.getLevel(),
+                context.absolutePos(SOURCE_RELATIVE),
+                Direction.NORTH,
+                context.getLevel().registryAccess().registryOrThrow(Registries.PAINTING_VARIANT)
+                        .getHolderOrThrow(PaintingVariants.KEBAB)
+        );
+        context.getLevel().addFreshEntity(painting);
+
+        moveSelectedBlock(context, SOURCE_RELATIVE);
+
+        context.runAfterDelay(2, () -> {
+            context.assertTrue(painting.getPos().equals(context.absolutePos(SOURCE_RELATIVE.east())),
+                    "painting must move with its selected support");
+            assertNoDroppedItems(context);
+            context.succeed();
+        });
     }
 
     @GameTest(template = EMPTY_STRUCTURE)

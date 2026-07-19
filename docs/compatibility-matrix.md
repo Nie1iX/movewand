@@ -22,6 +22,7 @@ This document defines the support boundary for the first public alpha. `GameTest
 | Furnace and brewing stand | GameTest covered | Inventory and active progress data are preserved | Smoker, blast furnace, redstone, and GUI behavior after reconnect |
 | Hopper | GameTest covered | Inventory NBT is preserved | Neighbor inventories, redstone, and transfer timing |
 | Sign and lectern | GameTest covered | Sign data and lectern book data are preserved | Interaction and rendering after reconnect |
+| Item frames and paintings | GameTest covered | Item-frame translation and rotation; 1×1 painting translation | Glow item frames, map items, paintings of every size, and multiplayer rendering |
 | Locked `BlockEntity` | GameTest covered | Rejection before world mutation | Mod-specific lock conventions |
 | Denylist-tagged blocks | GameTest covered | Rejection for relocation opt-out tags | Mod-specific tag coverage |
 | Create ordinary blocks | No integration claim | Generic denylist is recognized | Kinetic networks, storage, smart blocks, and rotation require a dedicated integration review |
@@ -33,6 +34,21 @@ This document defines the support boundary for the first public alpha. `GameTest
 2. For each supported vanilla scenario, test translation, `Y` rotation, a second transform, leaving the world, and rejoining it.
 3. Test multiplayer: one player performs the operation and another observes the resulting blocks and inventories after reconnecting.
 4. Test every modded integration in an isolated world. If a block is unsafe, add its block id to a denylist data pack until a dedicated integration exists.
+
+## Manual QA checklist
+
+Run this checklist on both Fabric and NeoForge in a backed-up world. For every successful case, test translation, `Y` rotation, a second move, and source/destination overlap where it makes sense.
+
+- [ ] Selection: a single stone block; a 2×2×2 structure; a selection near the 512-block limit; offsets on all three axes; a blocked destination; an unloaded destination; an unmovable block is highlighted and named in the rejection message.
+- [ ] Block states: stairs, slabs, logs, glazed terracotta, observers, pistons, and redstone components keep their `facing`, `axis`, or other orientation after translation and rotation.
+- [ ] Support-dependent blocks: flowers, short grass, carpets, pressure plates, torches, buttons, levers, rails, and pointed dripstone. Move them once with their support selected and once without it; the latter must follow vanilla breaking behavior without duplicating items.
+- [ ] Redstone: a line containing dust, repeaters, comparators, lamps, observers, pistons, and a target block. Test a multi-block selection, overlap with the source, rotation, and that no duplicate drops appear.
+- [ ] Multi-block structures: doors, beds, tall plants, double chests, and a chest adjacent to a double chest. Test selecting one part and every part where applicable.
+- [ ] Block entities: chest, barrel, shulker box, ender chest, furnace, smoker, blast furnace, brewing stand, hopper, sign, lectern, and decorated pot. Check inventories, custom names, active progress, redstone, GUI opening, and reconnect behavior.
+- [ ] Hanging entities: item frames, glow item frames, and paintings in several sizes. Select every supporting block, then verify the entity moves and rotates without a duplicate item or a delayed drop at the old position. Repeat with an item and a map inside a frame.
+- [ ] Fluids and terrain: move into flowing water, near source water and lava, and across uneven terrain; source fluid positions must still be rejected.
+- [ ] Persistence and multiplayer: reconnect after a move; have another player observe the operation; repeat with both players holding or viewing the same container and item frame.
+- [ ] Modded blocks: test each installed mod in a separate world before using it in survival. A passed vanilla case does not imply third-party compatibility.
 
 ## External contracts used as references
 

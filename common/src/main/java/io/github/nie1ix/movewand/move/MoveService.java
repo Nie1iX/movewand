@@ -6,13 +6,16 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.phys.AABB;
 import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.selection.BlockSelection;
 import io.github.nie1ix.movewand.selection.ServerSelectionManager;
@@ -126,6 +129,8 @@ public final class MoveService {
             return;
         }
 
+        List<HangingEntity> hangingEntities = selectedHangingEntities(level, source.positions());
+
         // Remove captured BlockEntities first so container blocks cannot drop their inventory on removal.
         for (BlockPos position : blockEntityData.keySet()) {
             level.removeBlockEntity(position);
@@ -146,6 +151,7 @@ public final class MoveService {
                 blockEntity.setChanged();
             }
         }
+        relocateHangingEntities(hangingEntities, destinations, turns);
         updateBoundaryShapes(level, source.positions(), destinations.values());
         for (BlockPos position : source.positions()) {
             level.updateNeighborsAt(position, level.getBlockState(position).getBlock());
@@ -158,6 +164,28 @@ public final class MoveService {
         ServerSelectionManager.replace(player, updatedSelection);
         ServerSelectionManager.sendSelectionUpdate(player);
         player.displayClientMessage(Component.translatable("message.movewand.move.success"), true);
+    }
+
+    private static List<HangingEntity> selectedHangingEntities(ServerLevel level, Set<BlockPos> positions) {
+        AABB bounds = new AABB(positions.iterator().next());
+        for (BlockPos position : positions) {
+            bounds = bounds.minmax(new AABB(position));
+        }
+        return level.getEntitiesOfClass(HangingEntity.class, bounds.inflate(1), entity -> positions.contains(entity.getPos()));
+    }
+
+    private static void relocateHangingEntities(
+            List<HangingEntity> entities,
+            Map<BlockPos, BlockPos> destinations,
+            int turns
+    ) {
+        for (HangingEntity entity : entities) {
+            BlockPos destination = destinations.get(entity.getPos());
+            for (int turn = 0; turn < turns; turn++) {
+                entity.rotate(Rotation.CLOCKWISE_90);
+            }
+            entity.setPos(destination.getX(), destination.getY(), destination.getZ());
+        }
     }
 
     private static void updateBoundaryShapes(ServerLevel level, Set<BlockPos> sourcePositions,
