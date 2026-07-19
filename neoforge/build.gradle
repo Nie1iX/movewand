@@ -10,12 +10,41 @@ base {
     archivesName = 'movewand-neoforge'
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    withSourcesJar()
+}
+
+def sharedJava = fileTree('../src/main/java') {
+    exclude 'io/github/nie1ix/movewand/MoveWand.java'
+    exclude 'io/github/nie1ix/movewand/network/MoveWandNetworking.java'
+    exclude 'io/github/nie1ix/movewand/registry/ModItems.java'
+    exclude 'io/github/nie1ix/movewand/selection/ServerSelectionManager.java'
+}
 
 sourceSets.main.resources {
     srcDir('../src/main/resources')
     exclude 'fabric.mod.json'
     exclude 'movewand.client.mixins.json'
+}
+
+tasks.named('compileJava', JavaCompile) {
+    source sharedJava
+}
+
+tasks.named('sourcesJar') {
+    from sharedJava
+}
+
+tasks.register('prepareGameTestStructures', Copy) {
+    from layout.projectDirectory.dir('src/main/resources/gameteststructures')
+    into layout.projectDirectory.dir('run/gameTestServer/gameteststructures')
+}
+
+tasks.configureEach {
+    if (name == 'runGameTestServer') {
+        dependsOn 'prepareGameTestStructures'
+    }
 }
 
 runs {
