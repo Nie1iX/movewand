@@ -60,6 +60,13 @@ runs {
 
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
 }
 
 tasks.withType(ProcessResources).configureEach {
