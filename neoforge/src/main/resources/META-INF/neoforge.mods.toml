@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+
+[[mods]]
+modId="movewand"
+version="${mod_version}"
+displayName="MoveWand"
+logoFile="assets/movewand/icon.png"
+logoBlur=false
+authors="Nie1iX"
+description='''A survival tool for safely moving and rotating existing structures.'''
+
+[[dependencies.movewand]]
+modId="neoforge"
+type="required"
+versionRange="[${neo_version},)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.movewand]]
+modId="minecraft"
+type="required"
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"
