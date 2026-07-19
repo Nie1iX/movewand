@@ -4,7 +4,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import io.github.nie1ix.movewand.selection.BlockSelection;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,11 +15,11 @@ public final class SelectionTransform {
     }
 
     public static Set<BlockPos> translate(BlockSelection selection, Direction direction) {
-        return Set.copyOf(translationMap(selection, direction).values());
+        return Collections.unmodifiableSet(new LinkedHashSet<>(translationMap(selection, direction).values()));
     }
 
     public static Set<BlockPos> translate(BlockSelection selection, BlockPos offset) {
-        return Set.copyOf(translationMap(selection, offset).values());
+        return Collections.unmodifiableSet(new LinkedHashSet<>(translationMap(selection, offset).values()));
     }
 
     public static Map<BlockPos, BlockPos> translationMap(BlockSelection selection, Direction direction) {
@@ -29,11 +31,11 @@ public final class SelectionTransform {
         for (BlockPos position : selection.positions()) {
             targets.put(position, position.offset(offset));
         }
-        return Map.copyOf(targets);
+        return Collections.unmodifiableMap(targets);
     }
 
     public static Set<BlockPos> rotateY(BlockSelection selection, BlockPos pivot, RotationDirection direction) {
-        return Set.copyOf(rotationMap(selection, pivot, direction).values());
+        return Collections.unmodifiableSet(new LinkedHashSet<>(rotationMap(selection, pivot, direction).values()));
     }
 
     public static Set<BlockPos> rotateY(BlockSelection selection, RotationDirection direction) {
@@ -45,7 +47,7 @@ public final class SelectionTransform {
         for (BlockPos position : selection.positions()) {
             positions.put(position, rotatePosition(position, pivot, direction));
         }
-        return Map.copyOf(positions);
+        return Collections.unmodifiableMap(positions);
     }
 
     public static Map<BlockPos, BlockPos> transformMap(BlockSelection selection, BlockPos offset, int clockwiseTurns) {
@@ -58,7 +60,7 @@ public final class SelectionTransform {
             }
             targets.put(position, target.offset(offset));
         }
-        return Map.copyOf(targets);
+        return Collections.unmodifiableMap(targets);
     }
 
     private static BlockPos rotatePosition(BlockPos position, BlockPos pivot, RotationDirection direction) {

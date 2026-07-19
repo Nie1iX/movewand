@@ -26,6 +26,7 @@ import io.github.nie1ix.movewand.transform.BlockStateTransform;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -78,7 +79,7 @@ public final class MoveService {
         ServerLevel level = player.serverLevel();
         Set<BlockPos> selectedPositions = selected.get().positions().stream()
                 .filter(position -> !level.getBlockState(position).isAir())
-                .collect(java.util.stream.Collectors.toUnmodifiableSet());
+                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
         if (selectsOneHalfOfDoubleChest(selectedPositions, level)) {
             player.displayClientMessage(Component.translatable("message.movewand.move.double_chest"), true);
             return;

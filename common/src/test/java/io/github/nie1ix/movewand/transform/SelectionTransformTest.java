@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 class SelectionTransformTest {
     @Test
@@ -31,6 +32,21 @@ class SelectionTransformTest {
             Map.of(first, new BlockPos(0, 5, 0), second, new BlockPos(1, 5, 0)),
             SelectionTransform.translationMap(selection, Direction.UP)
         );
+    }
+
+    @Test
+    void preservesSourceOrderInTransformationMaps() {
+        List<BlockPos> positions = List.of(
+                new BlockPos(4, 0, 0),
+                new BlockPos(1, 0, 0),
+                new BlockPos(3, 0, 0),
+                new BlockPos(0, 0, 0),
+                new BlockPos(2, 0, 0)
+        );
+
+        assertIterableEquals(positions, SelectionTransform.translationMap(
+                BlockSelection.of(positions), Direction.UP
+        ).keySet());
     }
 
     @Test

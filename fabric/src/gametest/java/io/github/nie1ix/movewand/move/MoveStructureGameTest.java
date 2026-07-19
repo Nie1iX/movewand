@@ -116,6 +116,55 @@ public final class MoveStructureGameTest implements FabricGameTest {
     }
 
     @GameTest(template = EMPTY_STRUCTURE)
+    public void doesNotDropCarpetsWhenDestinationOverlapsSource(GameTestHelper context) {
+        context.setBlock(SOURCE_RELATIVE, Blocks.STONE);
+        context.setBlock(SOURCE_RELATIVE.above(), Blocks.WHITE_CARPET);
+        context.setBlock(SOURCE_RELATIVE.south(), Blocks.STONE);
+        context.setBlock(SOURCE_RELATIVE.south().above(), Blocks.WHITE_CARPET);
+
+        moveSelectedBlocks(context, List.of(
+                SOURCE_RELATIVE,
+                SOURCE_RELATIVE.above(),
+                SOURCE_RELATIVE.south(),
+                SOURCE_RELATIVE.south().above()
+        ), 0, 0, 1, 0);
+
+        context.runAfterDelay(2, () -> {
+            context.assertBlockPresent(Blocks.WHITE_CARPET, SOURCE_RELATIVE.south().above());
+            context.assertBlockPresent(Blocks.WHITE_CARPET, SOURCE_RELATIVE.south(2).above());
+            assertNoDroppedItems(context);
+            context.succeed();
+        });
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void doesNotDropRedstoneComponentsWhenDestinationOverlapsSource(GameTestHelper context) {
+        BlockPos first = SOURCE_RELATIVE;
+        BlockPos second = first.south();
+        BlockPos third = second.south();
+        context.setBlock(first.below(), Blocks.STONE);
+        context.setBlock(second.below(), Blocks.STONE);
+        context.setBlock(third.below(), Blocks.STONE);
+        context.setBlock(first, Blocks.REDSTONE_WIRE);
+        context.setBlock(second, Blocks.COMPARATOR);
+        context.setBlock(third, Blocks.REPEATER);
+
+        moveSelectedBlocks(context, List.of(
+                first.below(), first,
+                second.below(), second,
+                third.below(), third
+        ), 0, 0, 1, 0);
+
+        context.runAfterDelay(2, () -> {
+            context.assertBlockPresent(Blocks.REDSTONE_WIRE, first.south());
+            context.assertBlockPresent(Blocks.COMPARATOR, second.south());
+            context.assertBlockPresent(Blocks.REPEATER, third.south());
+            assertNoDroppedItems(context);
+            context.succeed();
+        });
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
     public void movesIntoFlowingWater(GameTestHelper context) {
         context.setBlock(SOURCE_RELATIVE, Blocks.STONE);
         context.setBlock(SOURCE_RELATIVE.east(), Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, 3));
