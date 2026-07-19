@@ -57,7 +57,7 @@ def resourceProperties = [
 	mod_id           : project.mod_id,
 	mod_license      : project.mod_license,
 	mod_name         : project.mod_name,
-	version          : project.mod_version,
+	version          : project.version,
 ]
 
 processResources {
