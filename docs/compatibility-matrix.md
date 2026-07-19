@@ -28,7 +28,7 @@ This document defines the support boundary for the first public alpha. `GameTest
 | Denylist-tagged blocks | GameTest covered | Rejection for relocation opt-out tags | Mod-specific tag coverage |
 | Oritech `1.2.9` multiblocks | Addon available | GameTest: controller/core selection expansion and coordinate-reference NBT rewrite | Translation, rotation, GUI, recipes, reconnect, and multiplayer on Fabric and NeoForge |
 | Create ordinary blocks | No integration claim | Generic denylist is recognized | Kinetic networks, storage, smart blocks, and rotation require a dedicated integration review |
-| AE2 | No integration claim | None | Cables, machines, storage, and network reconnect require a dedicated integration review |
+| AE2 `19.2.x` (NeoForge) | Addon available | Unit tests: block orientation and CableBus side NBT rotation | ME Drive/Cell Workbench, terminals, facades, network reconnect, and multiplayer |
 
 ## Verification sequence
 

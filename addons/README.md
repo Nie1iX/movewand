@@ -10,8 +10,8 @@ addons/
   <mod>/
     build.gradle              shared add-on version and buildAddon task
     src/                      loader-neutral integration and tests
-    fabric/                   Fabric entrypoint and metadata
-    neoforge/                 NeoForge entrypoint and metadata
+    fabric/                   optional Fabric entrypoint and metadata
+    neoforge/                 optional NeoForge entrypoint and metadata
 ```
 
 The loader-neutral code must use `MoveIntegration` from `common`. Do not add
@@ -23,6 +23,7 @@ third-party mod dependencies to the base projects.
 - `./gradlew buildAddons` builds every optional add-on.
 - `./gradlew :addons:<mod>:buildAddon` builds one integration.
 - `./gradlew :addons:oritech:fabric:runGameTest` runs Oritech's runtime GameTest.
+- `./gradlew :addons:ae2:buildAddon` builds the NeoForge-only AE2 integration.
 
 Built add-on JARs are written to `build/addons/`. The `addons` aggregate project
 automatically invokes each immediate add-on's `buildAddon` task.

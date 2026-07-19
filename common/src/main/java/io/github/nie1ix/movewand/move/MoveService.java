@@ -128,7 +128,10 @@ public final class MoveService {
                 }
                 blockEntityData.put(position, data);
             }
-            states.put(position, BlockStateTransform.rotateY(state, turns));
+            states.put(
+                    position,
+                    MoveIntegrations.transformBlockState(BlockStateTransform.rotateY(state, turns), turns)
+            );
         }
 
         MoveContext moveContext = new MoveContext(level, destinations, blockEntityData, turns);

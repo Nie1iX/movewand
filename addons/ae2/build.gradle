@@ -1,0 +1,16 @@
+ext {
+    addonVersion = '0.1.0-SNAPSHOT'
+    movewandMinVersion = '1.0.0'
+    movewandMaxVersion = '2.0.0'
+    ae2Version = '19.2.16'
+}
+
+subprojects {
+    version = "${parent.addonVersion}+mc${rootProject.minecraft_version}"
+}
+
+tasks.register('buildAddon') {
+    group = 'build'
+    description = 'Builds the AE2 integration addon.'
+    dependsOn ':addons:ae2:neoforge:assemble', ':addons:ae2:neoforge:check'
+}

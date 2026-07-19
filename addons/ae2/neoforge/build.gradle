@@ -1,0 +1,67 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.gradle.userdev' version '7.1.38'
+}
+
+base {
+    archivesName = "${mod_id}-ae2-neoforge"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    withSourcesJar()
+}
+
+sourceSets.main.java.srcDir('../src/main/java')
+sourceSets.test.java.srcDir('../src/test/java')
+
+runs {
+    configureEach {
+        workingDirectory project.layout.projectDirectory.dir('run').dir(name)
+        modSource project.sourceSets.main
+    }
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neo_version}"
+    implementation "org.appliedenergistics:appliedenergistics2:${parent.ae2Version}"
+    compileOnly files(rootProject.project(':neoforge').sourceSets.main.output)
+
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation files(rootProject.project(':neoforge').sourceSets.main.output)
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(ProcessResources).configureEach {
+    def replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            loader_version_range   : loader_version_range,
+            movewand_version_range : "[${parent.movewandMinVersion},${parent.movewandMaxVersion})",
+            ae2_version_range      : '[19.2.0,20)',
+            mod_version            : project.version,
+    ]
+    inputs.properties replaceProperties
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand replaceProperties
+    }
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+tasks.named('jar') {
+    destinationDirectory.set(rootProject.layout.buildDirectory.dir('addons'))
+}
+
+tasks.named('sourcesJar') {
+    destinationDirectory.set(rootProject.layout.buildDirectory.dir('addons'))
+}
+
+def addonBuild = tasks.replace('build')
+addonBuild.setDependsOn([])
+addonBuild.group = 'build'
+addonBuild.description = 'Use buildAddons to build optional integration addons.'

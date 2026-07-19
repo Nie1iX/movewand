@@ -2,6 +2,7 @@ package io.github.nie1ix.movewand.move.integration;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -26,6 +27,10 @@ public final class MoveIntegrations {
         return expandSelection(level, positions, all());
     }
 
+    public static BlockState transformBlockState(BlockState state, int clockwiseTurns) {
+        return transformBlockState(state, clockwiseTurns, all());
+    }
+
     static Set<BlockPos> expandSelection(
             ServerLevel level,
             Set<BlockPos> positions,
@@ -36,5 +41,17 @@ public final class MoveIntegrations {
             expanded = new LinkedHashSet<>(integration.expandSelection(level, expanded));
         }
         return expanded;
+    }
+
+    static BlockState transformBlockState(
+            BlockState state,
+            int clockwiseTurns,
+            List<MoveIntegration> integrations
+    ) {
+        BlockState transformed = state;
+        for (MoveIntegration integration : integrations) {
+            transformed = integration.transformBlockState(transformed, clockwiseTurns);
+        }
+        return transformed;
     }
 }
