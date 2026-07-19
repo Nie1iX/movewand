@@ -75,7 +75,7 @@ public final class MoveStructureGameTest implements FabricGameTest {
     }
 
     @GameTest(template = EMPTY_STRUCTURE)
-    public void doesNotMoveBedWithoutDestinationSupport(GameTestHelper context) {
+    public void movesBedWithoutDestinationSupport(GameTestHelper context) {
         BlockState foot = Blocks.RED_BED.defaultBlockState()
                 .setValue(BedBlock.FACING, Direction.NORTH)
                 .setValue(BedBlock.PART, BedPart.FOOT);
@@ -89,13 +89,15 @@ public final class MoveStructureGameTest implements FabricGameTest {
 
         moveSelectedBlock(context, SOURCE_RELATIVE);
 
-        context.assertBlockState(SOURCE_RELATIVE, state -> state.equals(foot),
-                () -> "bed foot must remain when destination has no support");
-        context.assertBlockState(SOURCE_RELATIVE.north(), state -> state.equals(head),
-                () -> "bed head must remain when destination has no support");
-        context.assertBlockPresent(Blocks.AIR, SOURCE_RELATIVE.east());
-        context.assertBlockPresent(Blocks.AIR, SOURCE_RELATIVE.east().north());
-        context.succeed();
+        context.runAfterDelay(2, () -> {
+            context.assertBlockPresent(Blocks.AIR, SOURCE_RELATIVE);
+            context.assertBlockPresent(Blocks.AIR, SOURCE_RELATIVE.north());
+            context.assertBlockState(SOURCE_RELATIVE.east(), state -> state.equals(foot),
+                    () -> "bed foot must move without destination support");
+            context.assertBlockState(SOURCE_RELATIVE.east().north(), state -> state.equals(head),
+                    () -> "bed head must move without destination support");
+            context.succeed();
+        });
     }
 
     @GameTest(template = EMPTY_STRUCTURE)
