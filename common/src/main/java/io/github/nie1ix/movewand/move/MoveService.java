@@ -171,7 +171,8 @@ public final class MoveService {
         for (BlockPos position : positions) {
             bounds = bounds.minmax(new AABB(position));
         }
-        return level.getEntitiesOfClass(HangingEntity.class, bounds.inflate(1), entity -> positions.contains(entity.getPos()));
+        return level.getEntitiesOfClass(HangingEntity.class, bounds.inflate(1),
+                entity -> positions.contains(hangingEntitySupport(entity)));
     }
 
     private static void relocateHangingEntities(
@@ -180,12 +181,17 @@ public final class MoveService {
             int turns
     ) {
         for (HangingEntity entity : entities) {
-            BlockPos destination = destinations.get(entity.getPos());
+            BlockPos destination = destinations.get(hangingEntitySupport(entity));
             for (int turn = 0; turn < turns; turn++) {
                 entity.rotate(Rotation.CLOCKWISE_90);
             }
-            entity.setPos(destination.getX(), destination.getY(), destination.getZ());
+            BlockPos hangingPosition = destination.relative(entity.getDirection());
+            entity.setPos(hangingPosition.getX(), hangingPosition.getY(), hangingPosition.getZ());
         }
+    }
+
+    private static BlockPos hangingEntitySupport(HangingEntity entity) {
+        return entity.getPos().relative(entity.getDirection().getOpposite());
     }
 
     private static void updateBoundaryShapes(ServerLevel level, Set<BlockPos> sourcePositions,

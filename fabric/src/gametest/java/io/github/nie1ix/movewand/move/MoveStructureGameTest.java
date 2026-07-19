@@ -120,17 +120,19 @@ public final class MoveStructureGameTest implements FabricGameTest {
         assertSupportedBlockMoves(context, Blocks.POINTED_DRIPSTONE.defaultBlockState(), Blocks.STONE);
     }
 
-    @GameTest(template = EMPTY_STRUCTURE)
+    @GameTest(template = EMPTY_STRUCTURE, timeoutTicks = 120)
     public void movesItemFrameWithSelectedSupport(GameTestHelper context) {
         context.setBlock(SOURCE_RELATIVE, Blocks.STONE);
-        ItemFrame itemFrame = new ItemFrame(context.getLevel(), context.absolutePos(SOURCE_RELATIVE), Direction.NORTH);
+        ItemFrame itemFrame = new ItemFrame(context.getLevel(), context.absolutePos(SOURCE_RELATIVE.north()), Direction.NORTH);
         context.getLevel().addFreshEntity(itemFrame);
 
         moveSelectedBlock(context, SOURCE_RELATIVE);
 
-        context.runAfterDelay(2, () -> {
-            context.assertTrue(itemFrame.getPos().equals(context.absolutePos(SOURCE_RELATIVE.east())),
+        context.runAfterDelay(110, () -> {
+            context.assertTrue(itemFrame.getPos().equals(context.absolutePos(SOURCE_RELATIVE.east().north())),
                     "item frame must move with its selected support");
+            context.assertTrue(itemFrame.isAlive() && itemFrame.survives(),
+                    "item frame must survive after vanilla rechecks its support");
             assertNoDroppedItems(context);
             context.succeed();
         });
@@ -139,13 +141,13 @@ public final class MoveStructureGameTest implements FabricGameTest {
     @GameTest(template = EMPTY_STRUCTURE)
     public void rotatesItemFrameWithSelectedSupport(GameTestHelper context) {
         context.setBlock(SOURCE_RELATIVE, Blocks.STONE);
-        ItemFrame itemFrame = new ItemFrame(context.getLevel(), context.absolutePos(SOURCE_RELATIVE), Direction.NORTH);
+        ItemFrame itemFrame = new ItemFrame(context.getLevel(), context.absolutePos(SOURCE_RELATIVE.north()), Direction.NORTH);
         context.getLevel().addFreshEntity(itemFrame);
 
         moveSelectedBlocks(context, List.of(SOURCE_RELATIVE), 0, 0, 0, 1);
 
         context.runAfterDelay(2, () -> {
-            context.assertTrue(itemFrame.getPos().equals(context.absolutePos(SOURCE_RELATIVE)),
+            context.assertTrue(itemFrame.getPos().equals(context.absolutePos(SOURCE_RELATIVE.east())),
                     "item frame must keep its support position when rotating in place");
             context.assertTrue(itemFrame.getDirection() == Direction.EAST,
                     "item frame must rotate with its selected support");
@@ -154,12 +156,12 @@ public final class MoveStructureGameTest implements FabricGameTest {
         });
     }
 
-    @GameTest(template = EMPTY_STRUCTURE)
+    @GameTest(template = EMPTY_STRUCTURE, timeoutTicks = 120)
     public void movesPaintingWithSelectedSupport(GameTestHelper context) {
         context.setBlock(SOURCE_RELATIVE, Blocks.STONE);
         Painting painting = new Painting(
                 context.getLevel(),
-                context.absolutePos(SOURCE_RELATIVE),
+                context.absolutePos(SOURCE_RELATIVE.north()),
                 Direction.NORTH,
                 context.getLevel().registryAccess().registryOrThrow(Registries.PAINTING_VARIANT)
                         .getHolderOrThrow(PaintingVariants.KEBAB)
@@ -168,9 +170,11 @@ public final class MoveStructureGameTest implements FabricGameTest {
 
         moveSelectedBlock(context, SOURCE_RELATIVE);
 
-        context.runAfterDelay(2, () -> {
-            context.assertTrue(painting.getPos().equals(context.absolutePos(SOURCE_RELATIVE.east())),
+        context.runAfterDelay(110, () -> {
+            context.assertTrue(painting.getPos().equals(context.absolutePos(SOURCE_RELATIVE.east().north())),
                     "painting must move with its selected support");
+            context.assertTrue(painting.isAlive() && painting.survives(),
+                    "painting must survive after vanilla rechecks its support");
             assertNoDroppedItems(context);
             context.succeed();
         });
