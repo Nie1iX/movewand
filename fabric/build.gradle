@@ -8,9 +8,6 @@ repositories {
 	}
 }
 
-version = "${project.mod_version}+mc${project.minecraft_version}"
-group = project.mod_group
-
 base {
 	archivesName = "${project.mod_id}-fabric"
 }
@@ -35,9 +32,9 @@ fabricApi {
 	}
 }
 
-sourceSets.main.java.srcDir '../src/main/java'
-sourceSets.main.resources.srcDir '../src/main/resources'
-sourceSets.test.java.srcDir '../src/test/java'
+sourceSets.main.java.srcDir '../common/src/main/java'
+sourceSets.main.resources.srcDir '../common/src/main/resources'
+sourceSets.test.java.srcDir '../common/src/test/java'
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -82,4 +79,12 @@ java {
 	withSourcesJar()
 	sourceCompatibility = JavaVersion.VERSION_21
 	targetCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.named('remapJar') {
+	destinationDirectory.set(rootProject.layout.buildDirectory.dir('mods'))
+}
+
+tasks.named('remapSourcesJar') {
+	destinationDirectory.set(rootProject.layout.buildDirectory.dir('mods'))
 }

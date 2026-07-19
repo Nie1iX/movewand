@@ -20,14 +20,13 @@ It is not a WorldEdit replacement and it does not copy or paste buildings. Use t
 
 ## Building
 
-Fabric and NeoForge are independent Gradle projects that share the code in `src/main`.
+Fabric and NeoForge are subprojects of one root Gradle build. Their shared source code is in `common/src`.
 
 ```bash
-./gradlew -p fabric build
-./gradlew -p neoforge build
+./gradlew build
 ```
 
-The resulting JARs are written to `fabric/build/libs/` and `neoforge/build/libs/` respectively:
+The production JARs are written to `build/mods/`:
 
 - `movewand-fabric-<mod-version>+mc<minecraft-version>.jar`
 - `movewand-neoforge-<mod-version>+mc<minecraft-version>.jar`

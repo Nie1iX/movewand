@@ -1,0 +1,12 @@
+plugins {
+	id 'base'
+}
+
+allprojects {
+	group = mod_group
+	version = "${mod_version}+mc${minecraft_version}"
+}
+
+tasks.named('build') {
+    dependsOn ':common:build', ':fabric:build', ':neoforge:build'
+}
