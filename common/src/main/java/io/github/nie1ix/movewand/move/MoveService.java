@@ -227,7 +227,8 @@ public final class MoveService {
     }
 
     static int sourceClearFlags() {
-        return Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
+        return Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS
+                | Block.UPDATE_MOVE_BY_PISTON;
     }
 
     static CompoundTag relocatedBlockEntityData(CompoundTag snapshot, BlockPos destination) {

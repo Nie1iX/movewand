@@ -27,6 +27,7 @@ import io.github.nie1ix.movewand.selection.BlockSelection;
 import io.github.nie1ix.movewand.selection.ServerSelectionManager;
 import io.github.nie1ix.movewand.transform.BlockStateTransform;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class MoveStructureGameTest implements FabricGameTest {
@@ -159,6 +160,58 @@ public final class MoveStructureGameTest implements FabricGameTest {
             context.assertBlockPresent(Blocks.REDSTONE_WIRE, first.south());
             context.assertBlockPresent(Blocks.COMPARATOR, second.south());
             context.assertBlockPresent(Blocks.REPEATER, third.south());
+            assertNoDroppedItems(context);
+            context.succeed();
+        });
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void doesNotDropRedstoneComponentsWhenRotating(GameTestHelper context) {
+        BlockPos pivot = SOURCE_RELATIVE;
+        BlockPos second = pivot.east();
+        BlockPos third = second.east();
+        context.setBlock(pivot, Blocks.STONE);
+        context.setBlock(second, Blocks.STONE);
+        context.setBlock(third, Blocks.STONE);
+        context.setBlock(pivot.above(), Blocks.REDSTONE_WIRE);
+        context.setBlock(second.above(), Blocks.COMPARATOR);
+        context.setBlock(third.above(), Blocks.REPEATER);
+
+        moveSelectedBlocks(context, List.of(
+                pivot, second, third,
+                pivot.above(), second.above(), third.above()
+        ), 0, 0, 0, 1);
+
+        context.runAfterDelay(2, () -> {
+            context.assertBlockPresent(Blocks.REDSTONE_WIRE, pivot.above());
+            context.assertBlockPresent(Blocks.COMPARATOR, pivot.south().above());
+            context.assertBlockPresent(Blocks.REPEATER, pivot.south(2).above());
+            assertNoDroppedItems(context);
+            context.succeed();
+        });
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void doesNotDropCarpetsWhenMovingLargeOverlappingStructure(GameTestHelper context) {
+        List<BlockPos> selection = new ArrayList<>();
+        for (int y = 0; y <= 1; y++) {
+            for (int x = 0; x < 3; x++) {
+                for (int z = 0; z < 3; z++) {
+                    BlockPos position = SOURCE_RELATIVE.offset(x, y, z);
+                    context.setBlock(position, y == 0 ? Blocks.STONE : Blocks.WHITE_CARPET);
+                    selection.add(position);
+                }
+            }
+        }
+
+        moveSelectedBlocks(context, selection, 0, 0, 1, 0);
+
+        context.runAfterDelay(2, () -> {
+            for (int x = 0; x < 3; x++) {
+                for (int z = 1; z <= 3; z++) {
+                    context.assertBlockPresent(Blocks.WHITE_CARPET, SOURCE_RELATIVE.offset(x, 1, z));
+                }
+            }
             assertNoDroppedItems(context);
             context.succeed();
         });
@@ -367,7 +420,9 @@ public final class MoveStructureGameTest implements FabricGameTest {
 
     private static void assertNoDroppedItems(GameTestHelper context) {
         AABB bounds = new AABB(context.absolutePos(SOURCE_RELATIVE)).inflate(4);
-        context.assertTrue(context.getLevel().getEntitiesOfClass(ItemEntity.class, bounds).isEmpty(),
-                "moving attached blocks must not create item drops");
+        List<ItemEntity> droppedItems = context.getLevel().getEntitiesOfClass(ItemEntity.class, bounds);
+        context.assertTrue(droppedItems.isEmpty(),
+                "moving attached blocks must not create item drops: "
+                        + droppedItems.stream().map(item -> item.getItem() + " at " + item.blockPosition()).toList());
     }
 }
