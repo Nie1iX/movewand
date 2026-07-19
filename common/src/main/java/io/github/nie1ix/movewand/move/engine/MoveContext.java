@@ -1,4 +1,4 @@
-package io.github.nie1ix.movewand.move.integration;
+package io.github.nie1ix.movewand.move.engine;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;

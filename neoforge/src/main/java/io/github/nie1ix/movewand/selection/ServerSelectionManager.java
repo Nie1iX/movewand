@@ -1,7 +1,7 @@
 package io.github.nie1ix.movewand.selection;
 
 import io.github.nie1ix.movewand.network.SelectionUpdatedPayload;
-import io.github.nie1ix.movewand.move.integration.MoveIntegrations;
+import io.github.nie1ix.movewand.move.engine.MoveHooks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,7 +28,7 @@ public final class ServerSelectionManager {
         SelectionEditor editor = EDITORS.computeIfAbsent(player.getUUID(), ignored -> new SelectionEditor());
         if (individualBlock) {
             editor.toggleBlocks(
-                    MoveIntegrations.expandSelection(
+                    MoveHooks.expandSelection(
                             player.level(),
                             StructureSelection.expandPairedBlocks(Set.of(position), player.level()::getBlockState)
                     ),
@@ -69,7 +69,7 @@ public final class ServerSelectionManager {
 
     private static void showSelectionSize(ServerPlayer player, SelectionEditor editor) {
         int size = editor.selection()
-                .map(selection -> MoveIntegrations.expandSelection(
+                .map(selection -> MoveHooks.expandSelection(
                         player.level(),
                         StructureSelection.expandPairedBlocks(selection.positions(), player.level()::getBlockState)
                 ).size())
@@ -87,7 +87,7 @@ public final class ServerSelectionManager {
 
     private static boolean expandPairedBlocks(ServerPlayer player, SelectionEditor editor) {
         return editor.selection().map(selection -> editor.replace(BlockSelection.of(
-                MoveIntegrations.expandSelection(
+                MoveHooks.expandSelection(
                         player.level(),
                         StructureSelection.expandPairedBlocks(selection.positions(), player.level()::getBlockState)
                 ),
