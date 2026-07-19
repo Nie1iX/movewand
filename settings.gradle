@@ -16,4 +16,3 @@ pluginManagement {
 rootProject.name = 'movewand'
 
 include 'common', 'fabric', 'neoforge'
-include 'addons:oritech', 'addons:oritech:fabric', 'addons:oritech:neoforge'

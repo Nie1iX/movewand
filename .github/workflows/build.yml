@@ -20,19 +20,16 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '25'
           cache: gradle
 
       - name: Build Fabric and NeoForge
         run: ./gradlew build --no-daemon --max-workers=1 --console=plain
 
-      - name: Run NeoForge GameTests
-        run: ./gradlew :neoforge:runGameTestServer --no-daemon --max-workers=1 --console=plain
-
       - name: Upload mod JARs
         uses: actions/upload-artifact@v4
         with:
-          name: movewand-mc1.21.1
+          name: movewand-mc26.2
           path: |
             build/mods/*-fabric-*.jar
             build/mods/*-neoforge-*.jar

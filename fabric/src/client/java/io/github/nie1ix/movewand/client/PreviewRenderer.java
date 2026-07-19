@@ -1,58 +1,57 @@
 package io.github.nie1ix.movewand.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import io.github.nie1ix.movewand.move.MoveProjection;
+import io.github.nie1ix.movewand.move.MoveValidator;
+import io.github.nie1ix.movewand.registry.ModItems;
+import io.github.nie1ix.movewand.selection.BlockSelection;
+import io.github.nie1ix.movewand.transform.BlockStateTransform;
+import io.github.nie1ix.movewand.transform.SelectionTransform;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.block.BlockModelRenderState;
+import net.minecraft.client.renderer.block.BlockModelResolver;
+import net.minecraft.client.renderer.block.model.BlockDisplayContext;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import io.github.nie1ix.movewand.registry.ModItems;
-import io.github.nie1ix.movewand.move.MoveValidator;
-import io.github.nie1ix.movewand.selection.BlockSelection;
-import io.github.nie1ix.movewand.move.MoveProjection;
-import io.github.nie1ix.movewand.transform.BlockStateTransform;
-import io.github.nie1ix.movewand.transform.SelectionTransform;
+import net.minecraft.world.phys.shapes.Shapes;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class PreviewRenderer {
-    private static final int GHOST_ALPHA = 96;
-    private static final RenderType GHOST_RENDER_TYPE = RenderType.entityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
+    private static final int GHOST_OUTLINE_COLOR = 0x60FFFFFF;
+    private static final BlockDisplayContext BLOCK_DISPLAY_CONTEXT = BlockDisplayContext.create();
+    private static BlockModelResolver blockModelResolver;
 
     private PreviewRenderer() {
     }
 
     public static void initialize() {
-        WorldRenderEvents.AFTER_ENTITIES.register(context -> {
-            if (context.world() == null || context.matrixStack() == null || context.consumers() == null) {
-                return;
-            }
-            if (Minecraft.getInstance().player == null
-                    || !shouldRenderSelection(Minecraft.getInstance().player.getMainHandItem(), ModItems.moveWand())) {
+        blockModelResolver = new BlockModelResolver(Minecraft.getInstance().getModelManager());
+        LevelRenderEvents.AFTER_TRANSLUCENT_FEATURES.register(context -> {
+            Minecraft client = Minecraft.getInstance();
+            if (client.level == null || client.player == null
+                    || !shouldRenderSelection(client.player.getMainHandItem(), ModItems.moveWand())) {
                 return;
             }
 
-            Vec3 camera = context.camera().getPosition();
+            Vec3 camera = context.levelState().cameraRenderState.pos;
             ClientSelectionHandler.pendingBoxCorner().ifPresent(corner -> renderPendingBoxCorner(context, camera, corner));
             ClientSelectionHandler.selection().ifPresent(selection -> {
                 if (TransformPreview.isActive()) {
-                    renderPreview(context, selection);
+                    renderPreview(context, client, selection, camera);
                 } else {
-                    renderSelection(context, selection);
+                    renderSelection(context, client, selection, camera);
                 }
             });
         });
@@ -62,152 +61,97 @@ public final class PreviewRenderer {
         return mainHandItem.is(moveWand);
     }
 
-    private static void renderPreview(net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context, BlockSelection selection) {
+    private static void renderPreview(LevelRenderContext context, Minecraft client, BlockSelection selection, Vec3 camera) {
         BlockPos offset = TransformPreview.offset();
         Map<BlockPos, BlockPos> targets = SelectionTransform.transformMap(selection, offset, TransformPreview.clockwiseTurns());
         Map<BlockPos, BlockState> states = new LinkedHashMap<>();
         for (BlockPos source : targets.keySet()) {
-            states.put(source, BlockStateTransform.rotateY(
-                    context.world().getBlockState(source),
-                    TransformPreview.clockwiseTurns()
-            ));
+            states.put(source, BlockStateTransform.rotateY(client.level.getBlockState(source), TransformPreview.clockwiseTurns()));
         }
-        LevelReader projectedLevel = MoveProjection.levelAfterMove(context.world(), states, targets);
+
+        LevelReader projectedLevel = MoveProjection.levelAfterMove(client.level, states, targets);
         boolean withinRange = TransformPreview.isOffsetWithinRange(offset);
-        Vec3 camera = context.camera().getPosition();
         renderGhostBlocks(context, targets, states, camera);
 
         for (Map.Entry<BlockPos, BlockPos> entry : targets.entrySet()) {
             BlockPos target = entry.getValue();
             BlockState state = states.get(entry.getKey());
-            boolean emptyOrOverlapping = selection.positions().contains(target) || context.world().getBlockState(target).isAir();
+            boolean emptyOrOverlapping = selection.positions().contains(target) || client.level.getBlockState(target).isAir();
             boolean valid = withinRange && emptyOrOverlapping && state.canSurvive(projectedLevel, target);
-            float red = valid ? 0.1f : 1.0f;
-            float green = valid ? 0.45f : 0.1f;
-            float blue = valid ? 1.0f : 0.1f;
-            AABB box = new AABB(target).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
-            LevelRenderer.renderLineBox(
-                    context.matrixStack(),
-                    context.consumers().getBuffer(RenderType.lines()),
-                    box,
-                    red,
-                    green,
-                    blue,
-                    0.8f
+            submitBlockOutline(
+                    context,
+                    target,
+                    camera,
+                    valid ? 0xCC1A73FF : 0xCCFF1A1A,
+                    1.0f
             );
         }
     }
 
     private static void renderGhostBlocks(
-            net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context,
+            LevelRenderContext context,
             Map<BlockPos, BlockPos> targets,
             Map<BlockPos, BlockState> states,
             Vec3 camera
     ) {
-        VertexConsumer vertices = new AlphaVertexConsumer(context.consumers().getBuffer(GHOST_RENDER_TYPE));
-        MultiBufferSource blockAtlasBuffers = ignored -> vertices;
-        MultiBufferSource nativeBuffers = renderType -> new AlphaVertexConsumer(context.consumers().getBuffer(renderType));
-        BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
-        PoseStack matrices = context.matrixStack();
+        PoseStack poseStack = context.poseStack();
+        SubmitNodeCollector collector = context.submitNodeCollector();
 
         for (Map.Entry<BlockPos, BlockPos> entry : targets.entrySet()) {
-            BlockPos target = entry.getValue();
-            matrices.pushPose();
-            matrices.translate(target.getX() - camera.x, target.getY() - camera.y, target.getZ() - camera.z);
-            blockRenderer.renderSingleBlock(
-                    states.get(entry.getKey()),
-                    matrices,
-                    usesBlockAtlasGhost(states.get(entry.getKey()).getRenderShape()) ? blockAtlasBuffers : nativeBuffers,
-                    LightTexture.FULL_BRIGHT,
-                    OverlayTexture.NO_OVERLAY
+            BlockModelRenderState model = new BlockModelRenderState();
+            blockModelResolver.update(model, states.get(entry.getKey()), BLOCK_DISPLAY_CONTEXT);
+            poseStack.pushPose();
+            translateToBlock(poseStack, entry.getValue(), camera);
+            model.submitOnlyOutline(
+                    poseStack,
+                    collector,
+                    LightCoordsUtil.FULL_BRIGHT,
+                    OverlayTexture.NO_OVERLAY,
+                    GHOST_OUTLINE_COLOR
             );
-            matrices.popPose();
+            poseStack.popPose();
         }
     }
 
-    static int ghostAlpha(int alpha) {
-        return Math.min(alpha, GHOST_ALPHA);
+    private static void renderPendingBoxCorner(LevelRenderContext context, Vec3 camera, BlockPos corner) {
+        submitBlockOutline(context, corner, camera, 0xFFFFBF1A, 1.0f);
     }
 
-    static boolean usesBlockAtlasGhost(RenderShape renderShape) {
-        return renderShape != RenderShape.ENTITYBLOCK_ANIMATED;
-    }
-
-    private static final class AlphaVertexConsumer implements VertexConsumer {
-        private final VertexConsumer delegate;
-
-        private AlphaVertexConsumer(VertexConsumer delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public VertexConsumer addVertex(float x, float y, float z) {
-            delegate.addVertex(x, y, z);
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setColor(int red, int green, int blue, int alpha) {
-            delegate.setColor(red, green, blue, ghostAlpha(alpha));
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setUv(float u, float v) {
-            delegate.setUv(u, v);
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setUv1(int u, int v) {
-            delegate.setUv1(u, v);
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setUv2(int u, int v) {
-            delegate.setUv2(u, v);
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setNormal(float x, float y, float z) {
-            delegate.setNormal(x, y, z);
-            return this;
-        }
-    }
-
-    private static void renderPendingBoxCorner(
-            net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context,
-            Vec3 camera,
-            BlockPos corner
-    ) {
-        AABB box = new AABB(corner).move(-camera.x, -camera.y, -camera.z).inflate(0.004);
-        LevelRenderer.renderLineBox(
-                context.matrixStack(),
-                context.consumers().getBuffer(RenderType.lines()),
-                box,
-                1.0f,
-                0.75f,
-                0.1f,
-                1.0f
-        );
-    }
-
-    private static void renderSelection(net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context, BlockSelection selection) {
-        Vec3 camera = context.camera().getPosition();
+    private static void renderSelection(LevelRenderContext context, Minecraft client, BlockSelection selection, Vec3 camera) {
         for (BlockPos position : selection.positions()) {
-            boolean unmovable = MoveValidator.isUnmovable(context.world().getBlockState(position));
-            AABB box = new AABB(position).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
-            LevelRenderer.renderLineBox(
-                    context.matrixStack(),
-                    context.consumers().getBuffer(RenderType.lines()),
-                    box,
-                    unmovable ? 1.0f : 0.2f,
-                    unmovable ? 0.25f : 0.8f,
-                    unmovable ? 0.05f : 1.0f,
-                    unmovable ? 0.8f : 0.45f
+            boolean unmovable = MoveValidator.isUnmovable(client.level.getBlockState(position));
+            submitBlockOutline(
+                    context,
+                    position,
+                    camera,
+                    unmovable ? 0xCCFF400D : 0x732ECCFF,
+                    1.0f
             );
         }
+    }
+
+    private static void submitBlockOutline(
+            LevelRenderContext context,
+            BlockPos position,
+            Vec3 camera,
+            int color,
+            float lineWidth
+    ) {
+        PoseStack poseStack = context.poseStack();
+        poseStack.pushPose();
+        translateToBlock(poseStack, position, camera);
+        context.submitNodeCollector().submitShapeOutline(
+                poseStack,
+                Shapes.block(),
+                RenderTypes.lines(),
+                color,
+                lineWidth,
+                true
+        );
+        poseStack.popPose();
+    }
+
+    private static void translateToBlock(PoseStack poseStack, BlockPos position, Vec3 camera) {
+        poseStack.translate(position.getX() - camera.x, position.getY() - camera.y, position.getZ() - camera.z);
     }
 }

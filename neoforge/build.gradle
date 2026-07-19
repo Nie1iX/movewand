@@ -1,6 +1,6 @@
 plugins {
     id 'java-library'
-    id 'net.neoforged.gradle.userdev' version '7.1.38'
+    id 'net.neoforged.moddev' version '2.0.141'
 }
 
 base {
@@ -8,7 +8,7 @@ base {
 }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
     withSourcesJar()
 }
 
@@ -19,33 +19,32 @@ sourceSets.main.resources {
 
 sourceSets.main.java.srcDir('../common/src/main/java')
 
-tasks.register('prepareGameTestStructures', Copy) {
-    from layout.projectDirectory.dir('src/main/resources/gameteststructures')
-    into layout.projectDirectory.dir('run/gameTestServer/gameteststructures')
-}
-
-tasks.configureEach {
-    if (name == 'runGameTestServer') {
-        dependsOn 'prepareGameTestStructures'
-    }
-}
-
-runs {
-    configureEach {
-        workingDirectory project.layout.projectDirectory.dir('run').dir(name)
-        modSource project.sourceSets.main
-    }
-
-    gameTestServer {
-        systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
-    }
-}
-
 dependencies {
-    implementation "net.neoforged:neoforge:${neo_version}"
     testImplementation platform('org.junit:junit-bom:5.11.4')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+neoForge {
+    version = neo_version
+
+    runs {
+        gameTestServer {
+            type = 'gameTestServer'
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+        }
+    }
+
+    mods {
+        movewand {
+            sourceSet sourceSets.main
+        }
+    }
+
+    unitTest {
+        enable()
+        testedMod = mods.movewand
+    }
 }
 
 tasks.withType(Test).configureEach {

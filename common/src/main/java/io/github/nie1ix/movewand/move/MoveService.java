@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -15,6 +16,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.phys.AABB;
 import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.move.integration.MoveContext;
@@ -50,21 +52,21 @@ public final class MoveService {
 
         int turns = Math.floorMod(clockwiseTurns, 4);
         if (!hasValidOffset(x, y, z) && turns == 0) {
-            player.displayClientMessage(Component.translatable("message.movewand.move.no_change"), true);
+            player.sendOverlayMessage(Component.translatable("message.movewand.move.no_change"));
             return;
         }
         if (!new BlockPos(x, y, z).equals(BlockPos.ZERO) && !hasValidOffset(x, y, z)) {
-            player.displayClientMessage(Component.translatable("message.movewand.move.too_far"), true);
+            player.sendOverlayMessage(Component.translatable("message.movewand.move.too_far"));
             return;
         }
 
         Optional<BlockSelection> selected = ServerSelectionManager.selection(player);
         if (selected.isEmpty()) {
-            player.displayClientMessage(Component.translatable("message.movewand.selection.empty"), true);
+            player.sendOverlayMessage(Component.translatable("message.movewand.selection.empty"));
             return;
         }
 
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         Set<BlockPos> selectedPositions = selected.get().positions().stream()
                 .filter(position -> !level.getBlockState(position).isAir())
                 .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
@@ -75,11 +77,11 @@ public final class MoveService {
                 .filter(position -> !level.getBlockState(position).isAir())
                 .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
         if (positions.isEmpty()) {
-            player.displayClientMessage(Component.translatable("message.movewand.selection.empty"), true);
+            player.sendOverlayMessage(Component.translatable("message.movewand.selection.empty"));
             return;
         }
         if (selectsOneHalfOfDoubleChest(positions, level)) {
-            player.displayClientMessage(Component.translatable("message.movewand.move.double_chest"), true);
+            player.sendOverlayMessage(Component.translatable("message.movewand.move.double_chest"));
             return;
         }
 
@@ -97,7 +99,7 @@ public final class MoveService {
         }
 
         if (destinations.values().stream().anyMatch(position -> !level.hasChunkAt(position))) {
-            player.displayClientMessage(Component.translatable("message.movewand.move.unloaded"), true);
+            player.sendOverlayMessage(Component.translatable("message.movewand.move.unloaded"));
             return;
         }
 
@@ -106,7 +108,7 @@ public final class MoveService {
             return state.isAir() || (!state.getFluidState().isEmpty() && !state.getFluidState().isSource());
         });
         if (validation != MoveValidation.VALID) {
-            player.displayClientMessage(Component.translatable("message.movewand.move.blocked"), true);
+            player.sendOverlayMessage(Component.translatable("message.movewand.move.blocked"));
             return;
         }
 
@@ -117,7 +119,7 @@ public final class MoveService {
             if (state.hasBlockEntity()) {
                 BlockEntity blockEntity = level.getBlockEntity(position);
                 if (blockEntity == null) {
-                    player.displayClientMessage(Component.translatable("message.movewand.move.block_entity"), true);
+                    player.sendOverlayMessage(Component.translatable("message.movewand.move.block_entity"));
                     return;
                 }
                 // Preserve inventory and other persistent BlockEntity state before replacing the block.
@@ -138,7 +140,7 @@ public final class MoveService {
 
         LevelReader projectedLevel = MoveProjection.levelAfterMove(level, states, destinations);
         if (states.entrySet().stream().anyMatch(entry -> !entry.getValue().canSurvive(projectedLevel, destinations.get(entry.getKey())))) {
-            player.displayClientMessage(Component.translatable("message.movewand.move.unsurvivable"), true);
+            player.sendOverlayMessage(Component.translatable("message.movewand.move.unsurvivable"));
             return;
         }
 
@@ -157,10 +159,11 @@ public final class MoveService {
         for (Map.Entry<BlockPos, CompoundTag> entry : blockEntityData.entrySet()) {
             BlockEntity blockEntity = level.getBlockEntity(destinations.get(entry.getKey()));
             if (blockEntity != null) {
-                blockEntity.loadWithComponents(
-                        relocatedBlockEntityData(entry.getValue(), destinations.get(entry.getKey())),
-                        level.registryAccess()
-                );
+                blockEntity.loadWithComponents(TagValueInput.create(
+                        ProblemReporter.DISCARDING,
+                        level.registryAccess(),
+                        relocatedBlockEntityData(entry.getValue(), destinations.get(entry.getKey()))
+                ));
                 blockEntity.setChanged();
             }
         }
@@ -179,7 +182,7 @@ public final class MoveService {
         BlockSelection updatedSelection = BlockSelection.of(destinations.values(), destinations.get(source.pivot()));
         ServerSelectionManager.replace(player, updatedSelection);
         ServerSelectionManager.sendSelectionUpdate(player);
-        player.displayClientMessage(Component.translatable("message.movewand.move.success"), true);
+        player.sendOverlayMessage(Component.translatable("message.movewand.move.success"));
     }
 
     private static List<HangingEntity> selectedHangingEntities(ServerLevel level, Set<BlockPos> positions) {
@@ -266,10 +269,7 @@ public final class MoveService {
     }
 
     private static void displayUnmovableBlock(ServerPlayer player, BlockState state) {
-        player.displayClientMessage(
-                Component.translatable("message.movewand.move.unmovable", state.getBlock().getName()),
-                true
-        );
+        player.sendOverlayMessage(Component.translatable("message.movewand.move.unmovable", state.getBlock().getName()));
     }
 
     public static boolean hasValidOffset(int x, int y, int z) {

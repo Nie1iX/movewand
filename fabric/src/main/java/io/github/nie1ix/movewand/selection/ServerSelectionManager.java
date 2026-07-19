@@ -29,8 +29,8 @@ public final class ServerSelectionManager {
         if (individualBlock) {
             editor.toggleBlocks(
                     MoveIntegrations.expandSelection(
-                            player.serverLevel(),
-                            StructureSelection.expandPairedBlocks(Set.of(position), player.serverLevel()::getBlockState)
+                            player.level(),
+                            StructureSelection.expandPairedBlocks(Set.of(position), player.level()::getBlockState)
                     ),
                     position
             );
@@ -41,15 +41,15 @@ public final class ServerSelectionManager {
 
         if (editor.selectBoxCorner(position)) {
             if (editor.pendingBoxCorner().isPresent()) {
-                player.displayClientMessage(Component.translatable("message.movewand.selection.first_corner"), true);
+                player.sendOverlayMessage(Component.translatable("message.movewand.selection.first_corner"));
             } else if (expandPairedBlocks(player, editor)) {
                 showSelectionSize(player, editor);
             } else {
                 editor.clear();
-                player.displayClientMessage(Component.translatable("message.movewand.selection.too_large"), true);
+                player.sendOverlayMessage(Component.translatable("message.movewand.selection.too_large"));
             }
         } else {
-            player.displayClientMessage(Component.translatable("message.movewand.selection.too_large"), true);
+            player.sendOverlayMessage(Component.translatable("message.movewand.selection.too_large"));
         }
         sendSelectionUpdate(player, editor);
     }
@@ -70,11 +70,11 @@ public final class ServerSelectionManager {
     private static void showSelectionSize(ServerPlayer player, SelectionEditor editor) {
         int size = editor.selection()
                 .map(selection -> MoveIntegrations.expandSelection(
-                        player.serverLevel(),
-                        StructureSelection.expandPairedBlocks(selection.positions(), player.serverLevel()::getBlockState)
+                        player.level(),
+                        StructureSelection.expandPairedBlocks(selection.positions(), player.level()::getBlockState)
                 ).size())
                 .orElse(0);
-        player.displayClientMessage(selectionSizeMessage(size), true);
+        player.sendOverlayMessage(selectionSizeMessage(size));
     }
 
     static Component selectionSizeMessage(int size) {
@@ -88,8 +88,8 @@ public final class ServerSelectionManager {
     private static boolean expandPairedBlocks(ServerPlayer player, SelectionEditor editor) {
         return editor.selection().map(selection -> editor.replace(BlockSelection.of(
                 MoveIntegrations.expandSelection(
-                        player.serverLevel(),
-                        StructureSelection.expandPairedBlocks(selection.positions(), player.serverLevel()::getBlockState)
+                        player.level(),
+                        StructureSelection.expandPairedBlocks(selection.positions(), player.level()::getBlockState)
                 ),
                 selection.pivot()
         ))).orElse(true);

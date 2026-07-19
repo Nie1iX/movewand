@@ -10,9 +10,3 @@ allprojects {
 tasks.named('build') {
     dependsOn ':common:build', ':fabric:build', ':neoforge:build'
 }
-
-tasks.register('buildAddons') {
-    group = 'build'
-    description = 'Builds all optional integration addons.'
-    dependsOn ':addons:buildAddons'
-}

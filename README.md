@@ -6,19 +6,19 @@ It is not a WorldEdit replacement and it does not copy or paste buildings. Use t
 
 ## Requirements
 
-- Minecraft `1.21.1`
-- Java 21
+- Minecraft `26.2`
+- Java 25
 - One supported loader:
-  - Fabric Loader `0.16` or newer and Fabric API for Minecraft `1.21.1`
-  - NeoForge `21.1.235`
+  - Fabric Loader `0.19.3` and Fabric API for Minecraft `26.2`
+  - NeoForge `26.2.0.25-beta`
 
 ## Installation
 
-1. Install either Fabric Loader with Fabric API, or NeoForge, for Minecraft `1.21.1`.
+1. Install either Fabric Loader with Fabric API, or NeoForge, for Minecraft `26.2`.
 2. Place the matching MoveWand JAR in the instance's `mods` directory.
-3. Launch the game with Java 21. Do not install both loader variants in one instance.
+3. Launch the game with Java 25. Do not install both loader variants in one instance.
 
-For Oritech `1.2.9`, also install the matching `movewand-oritech` JAR alongside MoveWand and Oritech. The addon expands a selected Oritech multiblock to its controller and cores, then updates their saved coordinate references.
+The Oritech `1.2.9` addon remains on the [`mc1.21.1` maintenance branch](https://github.com/Nie1iX/movewand/tree/mc1.21.1); it is not released for Minecraft `26.2`.
 
 ## Building
 
@@ -28,23 +28,12 @@ Fabric and NeoForge are subprojects of one root Gradle build. Their shared sourc
 ./gradlew build
 ```
 
-This builds only MoveWand. Build every optional integration with:
-
-```bash
-./gradlew buildAddons
-```
-
 MoveWand JARs are written to `build/mods/`:
 
 - `movewand-fabric-<mod-version>+mc<minecraft-version>.jar`
 - `movewand-neoforge-<mod-version>+mc<minecraft-version>.jar`
 
-Addon JARs are written to `build/addons/`:
-
-- `movewand-oritech-fabric-<addon-version>+mc<minecraft-version>.jar`
-- `movewand-oritech-neoforge-<addon-version>+mc<minecraft-version>.jar`
-
-Addons have their own version because they can be released independently of MoveWand. Each addon declares the compatible MoveWand version range in its loader metadata.
+Optional integrations are version-line-specific and are built from their maintenance branch.
 
 ## Crafting
 
@@ -68,7 +57,7 @@ Starting an individual-block selection clears a pending first box corner. The se
 | `Backspace` or `Esc` | Cancel the active preview |
 | `Delete` | Clear the selection |
 
-All bindings can be changed in Minecraft Controls. With Mod Menu installed, MoveWand's Configure button opens its key-binding settings.
+All bindings can be changed in Minecraft Controls.
 
 ## Safety and limits
 
@@ -88,6 +77,6 @@ MoveWand preserves `BlockState` and transfers `BlockEntity` data through NBT. Th
 - No copying, pasting, deleting, destination replacement, or mass building.
 - Only 90-degree rotations around the vertical `Y` axis.
 - No Undo command in the current release scope.
-- The supported runtimes are Fabric and NeoForge for Minecraft `1.21.1` on Java 21. Other Minecraft versions, if supported, are released as separate artifacts.
+- The supported runtimes are Fabric and NeoForge for Minecraft `26.2` on Java 25. Other Minecraft versions, if supported, are released as separate artifacts.
 
 See the [functional specification](docs/functional-spec.md) and [compatibility matrix](docs/compatibility-matrix.md) for the detailed contract.

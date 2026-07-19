@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import io.github.nie1ix.movewand.MoveWand;
 import io.github.nie1ix.movewand.selection.SelectionEditor;
 
@@ -14,7 +14,7 @@ import java.util.Set;
 public record SelectionUpdatedPayload(Set<BlockPos> positions, BlockPos pivot, BlockPos pendingBoxCorner)
         implements CustomPacketPayload {
     public static final Type<SelectionUpdatedPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(MoveWand.MOD_ID, "selection_updated")
+            Identifier.fromNamespaceAndPath(MoveWand.MOD_ID, "selection_updated")
     );
     public static final StreamCodec<RegistryFriendlyByteBuf, SelectionUpdatedPayload> CODEC = StreamCodec.of(
             (buffer, payload) -> {

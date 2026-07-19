@@ -9,9 +9,9 @@ public final class MoveWandNetworking {
     }
 
     public static void initialize() {
-        PayloadTypeRegistry.playC2S().register(MoveRequestPayload.TYPE, MoveRequestPayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(ClearSelectionPayload.TYPE, ClearSelectionPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(SelectionUpdatedPayload.TYPE, SelectionUpdatedPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(MoveRequestPayload.TYPE, MoveRequestPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(ClearSelectionPayload.TYPE, ClearSelectionPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(SelectionUpdatedPayload.TYPE, SelectionUpdatedPayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(MoveRequestPayload.TYPE, (payload, context) ->
                 MoveService.move(context.player(), payload.x(), payload.y(), payload.z(), payload.clockwiseTurns())
         );

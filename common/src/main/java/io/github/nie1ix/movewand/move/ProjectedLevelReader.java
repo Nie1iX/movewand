@@ -5,7 +5,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.ColorResolver;
+import net.minecraft.world.attribute.EnvironmentAttributeReader;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -50,18 +50,8 @@ final class ProjectedLevelReader implements LevelReader {
     }
 
     @Override
-    public float getShade(net.minecraft.core.Direction direction, boolean shaded) {
-        return delegate.getShade(direction, shaded);
-    }
-
-    @Override
     public LevelLightEngine getLightEngine() {
         return delegate.getLightEngine();
-    }
-
-    @Override
-    public int getBlockTint(BlockPos position, ColorResolver resolver) {
-        return delegate.getBlockTint(position, resolver);
     }
 
     @Override
@@ -132,5 +122,10 @@ final class ProjectedLevelReader implements LevelReader {
     @Override
     public FeatureFlagSet enabledFeatures() {
         return delegate.enabledFeatures();
+    }
+
+    @Override
+    public EnvironmentAttributeReader environmentAttributes() {
+        return delegate.environmentAttributes();
     }
 }

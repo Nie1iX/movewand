@@ -8,7 +8,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public final class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MoveWand.MOD_ID);
-    public static final DeferredItem<MoveWandItem> MOVE_WAND = ITEMS.register("move_wand", () -> new MoveWandItem(new Item.Properties()));
+    public static final DeferredItem<MoveWandItem> MOVE_WAND = ITEMS.registerItem("move_wand", MoveWandItem::new);
 
     private ModItems() {
     }

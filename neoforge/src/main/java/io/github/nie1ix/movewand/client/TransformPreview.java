@@ -5,7 +5,7 @@ import io.github.nie1ix.movewand.network.MoveRequestPayload;
 import io.github.nie1ix.movewand.transform.RelativeMove;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 public final class TransformPreview {
     private static BlockPos offset = BlockPos.ZERO;
@@ -44,7 +44,7 @@ public final class TransformPreview {
 
     public static void apply() {
         if (isActive()) {
-            PacketDistributor.sendToServer(new MoveRequestPayload(offset.getX(), offset.getY(), offset.getZ(), clockwiseTurns));
+            ClientPacketDistributor.sendToServer(new MoveRequestPayload(offset.getX(), offset.getY(), offset.getZ(), clockwiseTurns));
         }
     }
 

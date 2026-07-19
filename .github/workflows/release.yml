@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'mc*-*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: gradle
+
+      - name: Build loader variants
+        run: ./gradlew build --no-daemon --max-workers=1 --console=plain
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          assets=()
+          for artifact in build/mods/*.jar; do
+            [[ "$artifact" == *-sources.jar ]] || assets+=("$artifact")
+          done
+          test "${#assets[@]}" -eq 2
+          gh release create "$GITHUB_REF_NAME" "${assets[@]}" --title "MoveWand $GITHUB_REF_NAME" --generate-notes

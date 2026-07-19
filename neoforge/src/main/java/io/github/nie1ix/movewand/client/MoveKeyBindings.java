@@ -9,13 +9,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraft.resources.Identifier;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
 public final class MoveKeyBindings {
-    private static final String CATEGORY = "key.categories.movewand";
+    private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("movewand", "movewand"));
     private static final KeyMapping FORWARD = key("key.movewand.move_forward", GLFW.GLFW_KEY_UP);
     private static final KeyMapping BACKWARD = key("key.movewand.move_backward", GLFW.GLFW_KEY_DOWN);
     private static final KeyMapping LEFT = key("key.movewand.move_left", GLFW.GLFW_KEY_LEFT);
@@ -62,7 +63,7 @@ public final class MoveKeyBindings {
             TransformPreview.apply();
         }
         while (CLEAR_SELECTION.consumeClick()) {
-            PacketDistributor.sendToServer(new ClearSelectionPayload());
+            ClientPacketDistributor.sendToServer(new ClearSelectionPayload());
         }
     }
 

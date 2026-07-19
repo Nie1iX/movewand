@@ -2,8 +2,9 @@ package io.github.nie1ix.movewand.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.network.ClearSelectionPayload;
@@ -12,7 +13,7 @@ import io.github.nie1ix.movewand.transform.RelativeMove;
 import java.util.List;
 
 public final class MoveKeyBindings {
-    private static final String CATEGORY = "key.categories.movewand";
+    private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("movewand", "movewand"));
     private static final KeyMapping FORWARD = register("key.movewand.move_forward", GLFW.GLFW_KEY_UP);
     private static final KeyMapping BACKWARD = register("key.movewand.move_backward", GLFW.GLFW_KEY_DOWN);
     private static final KeyMapping LEFT = register("key.movewand.move_left", GLFW.GLFW_KEY_LEFT);
@@ -69,7 +70,7 @@ public final class MoveKeyBindings {
     }
 
     private static KeyMapping register(String translationKey, int keyCode) {
-        return KeyBindingHelper.registerKeyBinding(new KeyMapping(
+        return KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 translationKey,
                 InputConstants.Type.KEYSYM,
                 keyCode,

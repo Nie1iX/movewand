@@ -1,9 +1,10 @@
 # MoveWand Compatibility Matrix
 
-This document defines the support boundary for the first public alpha. `GameTest covered` means the named scenario has an automated Minecraft `GameTest`; it is not a substitute for manual multiplayer testing in a backed-up world.
+This document defines the support boundary for the first public alpha. `GameTest covered` means the named scenario has an automated Minecraft `GameTest`; it is not a substitute for manual multiplayer testing in a backed-up world. Those legacy annotation-based GameTests remain on the `mc1.21.1` maintenance line: Minecraft `26.2` replaced that API with data-driven test instances, so this line currently relies on unit tests and manual QA until those scenarios are migrated.
 
 ## Current contract
 
+- This version line targets Minecraft `26.2` on Java 25, for Fabric Loader `0.19.3` with Fabric API and NeoForge `26.2.0.25-beta`.
 - MoveWand transfers `BlockState` and `BlockEntity` NBT. Before loading NBT at the destination, it writes the destination `x`, `y`, and `z` coordinates.
 - A destination may be empty, part of the source selection that is freed by the same operation, or a non-source fluid position. Source fluids are rejected.
 - Bedrock, spawners, trial spawners, and blocks in `c:relocation_not_supported`, `forge:relocation_not_supported`, `create:non_movable`, or MoveWand's own denylist tags are rejected before the world changes. Missing tag namespaces do not add a dependency.
@@ -26,7 +27,7 @@ This document defines the support boundary for the first public alpha. `GameTest
 | Item frames and paintings | GameTest covered | Item-frame translation and rotation; 1×1 painting translation | Glow item frames, map items, paintings of every size, and multiplayer rendering |
 | Locked `BlockEntity` | GameTest covered | Rejection before world mutation | Mod-specific lock conventions |
 | Denylist-tagged blocks | GameTest covered | Rejection for relocation opt-out tags | Mod-specific tag coverage |
-| Oritech `1.2.9` multiblocks | Addon available | GameTest: controller/core selection expansion and coordinate-reference NBT rewrite | Translation, rotation, GUI, recipes, reconnect, and multiplayer on Fabric and NeoForge |
+| Oritech `1.2.9` multiblocks | `mc1.21.1` maintenance line only | GameTest: controller/core selection expansion and coordinate-reference NBT rewrite | Translation, rotation, GUI, recipes, reconnect, and multiplayer on Fabric and NeoForge |
 | Create ordinary blocks | No integration claim | Generic denylist is recognized | Kinetic networks, storage, smart blocks, and rotation require a dedicated integration review |
 | AE2 | No integration claim | None | Cables, machines, storage, and network reconnect require a dedicated integration review |
 
@@ -51,7 +52,7 @@ Run this checklist on both Fabric and NeoForge in a backed-up world. For every s
 - [ ] Fluids and terrain: move into flowing water, near source water and lava, and across uneven terrain; source fluid positions must still be rejected.
 - [ ] Persistence and multiplayer: reconnect after a move; have another player observe the operation; repeat with both players holding or viewing the same container and item frame.
 - [ ] Modded blocks: test each installed mod in a separate world before using it in survival. A passed vanilla case does not imply third-party compatibility.
-- [ ] Oritech `1.2.9`: with the matching MoveWand Oritech addon installed, select only one controller or core of each tested multiblock. Verify that all of its cores are added to the selection, then test translation, rotation, GUI interaction, active processing, reconnect, and multiplayer observation.
+- [ ] Oritech `1.2.9` on the `mc1.21.1` maintenance line: with the matching MoveWand Oritech addon installed, select only one controller or core of each tested multiblock. Verify that all of its cores are added to the selection, then test translation, rotation, GUI interaction, active processing, reconnect, and multiplayer observation.
 
 ## External contracts used as references
 
