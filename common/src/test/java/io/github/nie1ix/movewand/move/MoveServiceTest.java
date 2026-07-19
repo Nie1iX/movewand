@@ -43,7 +43,6 @@ class MoveServiceTest {
 
         assertTrue((flags & net.minecraft.world.level.block.Block.UPDATE_CLIENTS) != 0);
         assertTrue((flags & net.minecraft.world.level.block.Block.UPDATE_SUPPRESS_DROPS) != 0);
-        assertTrue((flags & net.minecraft.world.level.block.Block.UPDATE_MOVE_BY_PISTON) != 0);
         assertFalse((flags & net.minecraft.world.level.block.Block.UPDATE_NEIGHBORS) != 0);
     }
 }

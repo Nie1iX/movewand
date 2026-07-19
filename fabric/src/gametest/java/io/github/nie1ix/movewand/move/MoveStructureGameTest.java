@@ -182,6 +182,8 @@ public final class MoveStructureGameTest implements FabricGameTest {
                 pivot.above(), second.above(), third.above()
         ), 0, 0, 0, 1);
 
+        assertNoDroppedItems(context);
+
         context.runAfterDelay(2, () -> {
             context.assertBlockPresent(Blocks.REDSTONE_WIRE, pivot.above());
             context.assertBlockPresent(Blocks.COMPARATOR, pivot.south().above());

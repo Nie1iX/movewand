@@ -23,10 +23,13 @@ import io.github.nie1ix.movewand.selection.StructureSelection;
 import io.github.nie1ix.movewand.transform.SelectionTransform;
 import io.github.nie1ix.movewand.transform.BlockStateTransform;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -94,17 +97,18 @@ public final class MoveService {
         BlockSelection source = BlockSelection.of(positions, pivot);
         Map<BlockPos, BlockPos> destinations = SelectionTransform.transformMap(source, new BlockPos(x, y, z), turns);
 
-        if (source.positions().stream().anyMatch(position -> {
-            BlockState state = level.getBlockState(position);
-            return state.is(Blocks.BEDROCK)
+        Optional<BlockState> unmovableState = source.positions().stream()
+                .map(level::getBlockState)
+                .filter(state -> state.is(Blocks.BEDROCK)
                     || state.is(Blocks.SPAWNER)
                     || state.is(Blocks.TRIAL_SPAWNER)
                     || state.is(RELOCATION_NOT_SUPPORTED)
                     || state.is(MOVEWAND_RELOCATION_NOT_SUPPORTED)
                     || state.is(CREATE_NON_MOVABLE)
-                    || state.is(FORGE_RELOCATION_NOT_SUPPORTED);
-        })) {
-            player.displayClientMessage(Component.translatable("message.movewand.move.unmovable"), true);
+                    || state.is(FORGE_RELOCATION_NOT_SUPPORTED))
+                .findFirst();
+        if (unmovableState.isPresent()) {
+            displayUnmovableBlock(player, unmovableState.get());
             return;
         }
 
@@ -135,7 +139,7 @@ public final class MoveService {
                 // Preserve inventory and other persistent BlockEntity state before replacing the block.
                 CompoundTag data = blockEntity.saveWithoutMetadata(level.registryAccess());
                 if (data.contains("Lock") && !data.getString("Lock").isEmpty()) {
-                    player.displayClientMessage(Component.translatable("message.movewand.move.unmovable"), true);
+                    displayUnmovableBlock(player, state);
                     return;
                 }
                 blockEntityData.put(position, data);
@@ -153,7 +157,7 @@ public final class MoveService {
         for (BlockPos position : blockEntityData.keySet()) {
             level.removeBlockEntity(position);
         }
-        for (BlockPos position : source.positions()) {
+        for (BlockPos position : sourceClearOrder(level, states)) {
             level.setBlock(position, Blocks.AIR.defaultBlockState(), sourceClearFlags());
         }
         for (Map.Entry<BlockPos, BlockState> entry : states.entrySet()) {
@@ -200,6 +204,51 @@ public final class MoveService {
         }
     }
 
+    private static List<BlockPos> sourceClearOrder(ServerLevel level, Map<BlockPos, BlockState> states) {
+        Set<BlockPos> remaining = new LinkedHashSet<>(states.keySet());
+        Map<BlockPos, BlockState> projectedStates = new HashMap<>(states);
+        List<BlockPos> clearOrder = new ArrayList<>(states.size());
+        while (!remaining.isEmpty()) {
+            BlockPos next = remaining.stream()
+                    .filter(position -> canClearWithoutBreakingSelectedNeighbors(
+                            level, projectedStates, states, remaining, position))
+                    .findFirst()
+                    .orElseGet(() -> remaining.iterator().next());
+            clearOrder.add(next);
+            remaining.remove(next);
+            projectedStates.put(next, Blocks.AIR.defaultBlockState());
+        }
+        return clearOrder;
+    }
+
+    private static boolean canClearWithoutBreakingSelectedNeighbors(
+            ServerLevel level,
+            Map<BlockPos, BlockState> projectedStates,
+            Map<BlockPos, BlockState> states,
+            Set<BlockPos> remaining,
+            BlockPos position
+    ) {
+        projectedStates.put(position, Blocks.AIR.defaultBlockState());
+        LevelReader projectedLevel = new ProjectedLevelReader(level, projectedStates);
+        boolean safe = true;
+        for (Direction direction : Direction.values()) {
+            BlockPos neighbor = position.relative(direction);
+            if (remaining.contains(neighbor) && !states.get(neighbor).canSurvive(projectedLevel, neighbor)) {
+                safe = false;
+                break;
+            }
+        }
+        projectedStates.put(position, states.get(position));
+        return safe;
+    }
+
+    private static void displayUnmovableBlock(ServerPlayer player, BlockState state) {
+        player.displayClientMessage(
+                Component.translatable("message.movewand.move.unmovable", state.getBlock().getName()),
+                true
+        );
+    }
+
     public static boolean hasValidOffset(int x, int y, int z) {
         long squaredDistance = (long) x * x + (long) y * y + (long) z * z;
         return squaredDistance > 0 && squaredDistance <= (long) MAX_OFFSET_DISTANCE * MAX_OFFSET_DISTANCE;
@@ -227,8 +276,7 @@ public final class MoveService {
     }
 
     static int sourceClearFlags() {
-        return Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS
-                | Block.UPDATE_MOVE_BY_PISTON;
+        return Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
     }
 
     static CompoundTag relocatedBlockEntityData(CompoundTag snapshot, BlockPos destination) {
