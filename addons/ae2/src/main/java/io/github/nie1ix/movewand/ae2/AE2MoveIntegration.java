@@ -5,14 +5,14 @@ import appeng.api.orientation.IOrientableBlock;
 import appeng.api.orientation.IOrientationStrategy;
 import appeng.api.orientation.RelativeSide;
 import appeng.block.networking.CableBusBlock;
-import io.github.nie1ix.movewand.move.integration.MoveContext;
-import io.github.nie1ix.movewand.move.integration.MoveIntegration;
+import io.github.nie1ix.movewand.move.engine.MoveContext;
+import io.github.nie1ix.movewand.move.engine.MoveHook;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.block.state.BlockState;
 
-public final class AE2MoveIntegration implements MoveIntegration {
+public final class AE2MoveIntegration implements MoveHook {
     @Override
     public BlockState transformBlockState(BlockState state, int clockwiseTurns) {
         if (!(state.getBlock() instanceof IOrientableBlock block)) {

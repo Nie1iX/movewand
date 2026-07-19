@@ -5,7 +5,7 @@ on:
     branches: [1.21.1]
     paths:
       - 'addons/**'
-      - 'common/src/main/java/io/github/nie1ix/movewand/move/integration/**'
+      - 'common/src/main/java/io/github/nie1ix/movewand/move/engine/**'
       - 'build.gradle'
       - 'settings.gradle'
       - 'gradle.properties'
@@ -15,7 +15,7 @@ on:
     branches: [1.21.1]
     paths:
       - 'addons/**'
-      - 'common/src/main/java/io/github/nie1ix/movewand/move/integration/**'
+      - 'common/src/main/java/io/github/nie1ix/movewand/move/engine/**'
       - 'build.gradle'
       - 'settings.gradle'
       - 'gradle.properties'

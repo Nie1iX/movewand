@@ -1,7 +1,7 @@
 package io.github.nie1ix.movewand.oritech;
 
-import io.github.nie1ix.movewand.move.integration.MoveContext;
-import io.github.nie1ix.movewand.move.integration.MoveIntegration;
+import io.github.nie1ix.movewand.move.engine.MoveContext;
+import io.github.nie1ix.movewand.move.engine.MoveHook;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -13,7 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-public final class OritechMoveIntegration implements MoveIntegration {
+public final class OritechMoveIntegration implements MoveHook {
     private static final String CONNECTED_CORES = "connectedCores";
     private static final String CONTROLLER_X = "controller_x";
     private static final String CONTROLLER_Y = "controller_y";

@@ -14,7 +14,7 @@ addons/
     neoforge/                 optional NeoForge entrypoint and metadata
 ```
 
-The loader-neutral code must use `MoveIntegration` from `common`. Do not add
+The loader-neutral code must use `MoveHook` from `common`. Do not add
 third-party mod dependencies to the base projects.
 
 ## Build

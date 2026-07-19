@@ -1,6 +1,6 @@
 package io.github.nie1ix.movewand.oritech;
 
-import io.github.nie1ix.movewand.move.integration.MoveContext;
+import io.github.nie1ix.movewand.move.engine.MoveContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
