@@ -30,7 +30,7 @@ public final class MoveKeyBindings {
 
     public static void initialize() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.player == null || !client.player.getMainHandItem().is(ModItems.MOVE_WAND)) {
+            if (client.player == null || !client.player.getMainHandItem().is(ModItems.moveWand())) {
                 discardPendingClicks();
                 return;
             }

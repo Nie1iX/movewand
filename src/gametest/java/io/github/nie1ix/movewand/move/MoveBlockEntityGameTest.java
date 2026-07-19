@@ -140,7 +140,7 @@ public final class MoveBlockEntityGameTest implements ModInitializer, FabricGame
         blockEntity.setLock("secret");
 
         ServerPlayer player = makeServerPlayer(context);
-        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.MOVE_WAND));
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.moveWand()));
         ServerSelectionManager.replace(player, BlockSelection.of(List.of(source)));
         MoveService.move(player, 1, 0, 0, 0);
 
@@ -161,7 +161,7 @@ public final class MoveBlockEntityGameTest implements ModInitializer, FabricGame
         context.setBlock(SOURCE_RELATIVE.east(), right);
 
         ServerPlayer player = makeServerPlayer(context);
-        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.MOVE_WAND));
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.moveWand()));
         ServerSelectionManager.replace(player, BlockSelection.of(List.of(context.absolutePos(SOURCE_RELATIVE))));
         MoveService.move(player, 0, 0, 1, 0);
 
@@ -190,7 +190,7 @@ public final class MoveBlockEntityGameTest implements ModInitializer, FabricGame
         CompoundTag expected = sourceBlockEntity.saveWithoutMetadata(level.registryAccess());
 
         ServerPlayer player = makeServerPlayer(context);
-        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.MOVE_WAND));
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.moveWand()));
         ServerSelectionManager.replace(player, BlockSelection.of(List.of(source)));
         MoveService.move(player, 1, 0, 0, 0);
 

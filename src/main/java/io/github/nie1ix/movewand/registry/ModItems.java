@@ -16,6 +16,10 @@ public final class ModItems {
     public static void initialize() {
     }
 
+    public static Item moveWand() {
+        return MOVE_WAND;
+    }
+
     private static Item register(String path, Item item) {
         return Registry.register(BuiltInRegistries.ITEM, ResourceLocation.fromNamespaceAndPath(MoveWand.MOD_ID, path), item);
     }

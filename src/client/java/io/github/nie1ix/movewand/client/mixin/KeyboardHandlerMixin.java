@@ -19,7 +19,7 @@ final class KeyboardHandlerMixin {
                 && action == GLFW.GLFW_PRESS
                 && minecraft.screen == null
                 && minecraft.player != null
-                && minecraft.player.getMainHandItem().is(ModItems.MOVE_WAND)
+                && minecraft.player.getMainHandItem().is(ModItems.moveWand())
                 && TransformPreview.isActive()) {
             TransformPreview.cancel();
             callback.cancel();

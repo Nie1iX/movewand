@@ -278,7 +278,7 @@ public final class MoveStructureGameTest implements FabricGameTest {
     private static void moveSelectedBlocks(GameTestHelper context, List<BlockPos> sourceRelatives,
                                            int x, int y, int z, int turns) {
         ServerPlayer player = context.makeMockServerPlayerInLevel();
-        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.MOVE_WAND));
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.moveWand()));
         ServerSelectionManager.replace(player, BlockSelection.of(sourceRelatives.stream()
                 .map(context::absolutePos)
                 .toList()));

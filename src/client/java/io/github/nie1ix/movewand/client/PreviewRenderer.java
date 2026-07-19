@@ -41,7 +41,7 @@ public final class PreviewRenderer {
                 return;
             }
             if (Minecraft.getInstance().player == null
-                    || !shouldRenderSelection(Minecraft.getInstance().player.getMainHandItem(), ModItems.MOVE_WAND)) {
+                    || !shouldRenderSelection(Minecraft.getInstance().player.getMainHandItem(), ModItems.moveWand())) {
                 return;
             }
 

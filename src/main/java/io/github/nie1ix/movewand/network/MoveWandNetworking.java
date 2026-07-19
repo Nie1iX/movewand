@@ -16,7 +16,7 @@ public final class MoveWandNetworking {
                 MoveService.move(context.player(), payload.x(), payload.y(), payload.z(), payload.clockwiseTurns())
         );
         ServerPlayNetworking.registerGlobalReceiver(ClearSelectionPayload.TYPE, (payload, context) -> {
-            if (context.player().getMainHandItem().is(io.github.nie1ix.movewand.registry.ModItems.MOVE_WAND)) {
+            if (context.player().getMainHandItem().is(io.github.nie1ix.movewand.registry.ModItems.moveWand())) {
                 io.github.nie1ix.movewand.selection.ServerSelectionManager.clear(context.player());
             }
         });

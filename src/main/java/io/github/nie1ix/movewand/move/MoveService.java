@@ -55,7 +55,7 @@ public final class MoveService {
     }
 
     public static void move(ServerPlayer player, int x, int y, int z, int clockwiseTurns) {
-        if (!player.getMainHandItem().is(ModItems.MOVE_WAND)) {
+        if (!player.getMainHandItem().is(ModItems.moveWand())) {
             return;
         }
 
