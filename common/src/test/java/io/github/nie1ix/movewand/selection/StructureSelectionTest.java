@@ -6,6 +6,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -50,6 +51,25 @@ class StructureSelectionTest {
         Set<BlockPos> expanded = StructureSelection.expandPairedBlocks(Set.of(foot), Map.of(foot, footState, head, headState)::get);
 
         assertEquals(Set.of(foot, head), expanded);
+    }
+
+    @Test
+    void expandsDoublePlantSelectionToItsOtherHalf() {
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
+        BlockPos lower = new BlockPos(2, 4, 6);
+        BlockPos upper = lower.above();
+        BlockState lowerState = Blocks.SUNFLOWER.defaultBlockState()
+                .setValue(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER);
+        BlockState upperState = Blocks.SUNFLOWER.defaultBlockState()
+                .setValue(DoublePlantBlock.HALF, DoubleBlockHalf.UPPER);
+
+        Set<BlockPos> expanded = StructureSelection.expandPairedBlocks(
+                Set.of(lower),
+                Map.of(lower, lowerState, upper, upperState)::get
+        );
+
+        assertEquals(Set.of(lower, upper), expanded);
     }
 
     @Test

@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -25,6 +26,12 @@ public final class StructureSelection {
                 DoubleBlockHalf half = state.getValue(DoorBlock.HALF);
                 BlockState otherState = stateAt.apply(position.relative(half == DoubleBlockHalf.LOWER ? Direction.UP : Direction.DOWN));
                 if (otherState.is(state.getBlock()) && otherState.getValue(DoorBlock.HALF) != half) {
+                    expanded.add(position.relative(half == DoubleBlockHalf.LOWER ? Direction.UP : Direction.DOWN));
+                }
+            } else if (state.getBlock() instanceof DoublePlantBlock) {
+                DoubleBlockHalf half = state.getValue(DoublePlantBlock.HALF);
+                BlockState otherState = stateAt.apply(position.relative(half == DoubleBlockHalf.LOWER ? Direction.UP : Direction.DOWN));
+                if (otherState.is(state.getBlock()) && otherState.getValue(DoublePlantBlock.HALF) != half) {
                     expanded.add(position.relative(half == DoubleBlockHalf.LOWER ? Direction.UP : Direction.DOWN));
                 }
             } else if (state.getBlock() instanceof BedBlock) {
