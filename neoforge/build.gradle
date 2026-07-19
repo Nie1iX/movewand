@@ -15,17 +15,10 @@ java {
     withSourcesJar()
 }
 
-def sharedJava = fileTree('../src/main/java') {
-    exclude 'io/github/nie1ix/movewand/MoveWand.java'
-    exclude 'io/github/nie1ix/movewand/network/MoveWandNetworking.java'
-    exclude 'io/github/nie1ix/movewand/registry/ModItems.java'
-    exclude 'io/github/nie1ix/movewand/selection/ServerSelectionManager.java'
-}
+def sharedJava = fileTree('../src/main/java')
 
 sourceSets.main.resources {
     srcDir('../src/main/resources')
-    exclude 'fabric.mod.json'
-    exclude 'movewand.client.mixins.json'
     exclude 'gameteststructures/**'
 }
 

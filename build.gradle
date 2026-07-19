@@ -31,6 +31,13 @@ fabricApi {
 	}
 }
 
+sourceSets.main.java.srcDir 'src/fabric/java'
+sourceSets.main.resources.srcDir 'src/fabric/resources'
+sourceSets.client.java.srcDir 'src/fabric/client/java'
+sourceSets.test.java.srcDir 'src/fabric/test/java'
+sourceSets.gametest.java.srcDir 'src/fabric/gametest/java'
+sourceSets.gametest.resources.srcDir 'src/fabric/gametest/resources'
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings loom.officialMojangMappings()
