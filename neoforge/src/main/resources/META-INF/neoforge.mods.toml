@@ -1,6 +1,7 @@
 modLoader="javafml"
 loaderVersion="${loader_version_range}"
 license="${mod_license}"
+issueTrackerURL="https://github.com/Nie1iX/movewand/issues"
 
 [[mods]]
 modId="${mod_id}"
@@ -9,6 +10,7 @@ displayName="${mod_name}"
 logoFile="${mod_icon}"
 logoBlur=false
 authors="${mod_author}"
+displayURL="https://modrinth.com/project/movewand"
 description='''${mod_description}'''
 
 [[dependencies.${mod_id}]]
