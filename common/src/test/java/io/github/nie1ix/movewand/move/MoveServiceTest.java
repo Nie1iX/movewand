@@ -31,10 +31,10 @@ class MoveServiceTest {
 
         CompoundTag relocated = MoveService.relocatedBlockEntityData(snapshot, new BlockPos(10, 20, 30));
 
-        assertEquals(1, snapshot.getInt("x"));
-        assertEquals(10, relocated.getInt("x"));
-        assertEquals(20, relocated.getInt("y"));
-        assertEquals(30, relocated.getInt("z"));
+        assertEquals(1, snapshot.getInt("x").orElseThrow());
+        assertEquals(10, relocated.getInt("x").orElseThrow());
+        assertEquals(20, relocated.getInt("y").orElseThrow());
+        assertEquals(30, relocated.getInt("z").orElseThrow());
     }
 
     @Test
