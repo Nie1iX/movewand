@@ -9,10 +9,10 @@ import io.github.nie1ix.movewand.selection.BlockSelection;
 import io.github.nie1ix.movewand.transform.BlockStateTransform;
 import io.github.nie1ix.movewand.transform.SelectionTransform;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -94,7 +94,7 @@ public final class PreviewRenderer {
             boolean emptyOrOverlapping = selection.positions().contains(target) || client.level.getBlockState(target).isAir();
             boolean valid = withinRange && emptyOrOverlapping && state.canSurvive(projectedLevel, target);
             AABB box = new AABB(target).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
-            LevelRenderer.renderLineBox(
+            ShapeRenderer.renderLineBox(
                     matrices,
                     buffers.getBuffer(RenderType.lines()),
                     box,
@@ -114,7 +114,7 @@ public final class PreviewRenderer {
             Map<BlockPos, BlockState> states,
             Vec3 camera
     ) {
-        VertexConsumer vertices = new AlphaVertexConsumer(buffers.getBuffer(RenderType.entityTranslucentCull(TextureAtlas.LOCATION_BLOCKS)));
+        VertexConsumer vertices = new AlphaVertexConsumer(buffers.getBuffer(RenderType.itemEntityTranslucentCull(TextureAtlas.LOCATION_BLOCKS)));
         MultiBufferSource blockAtlasBuffers = ignored -> vertices;
         MultiBufferSource nativeBuffers = renderType -> new AlphaVertexConsumer(buffers.getBuffer(renderType));
 
@@ -136,7 +136,7 @@ public final class PreviewRenderer {
 
     private static void renderPendingBoxCorner(PoseStack matrices, MultiBufferSource buffers, Vec3 camera, BlockPos corner) {
         AABB box = new AABB(corner).move(-camera.x, -camera.y, -camera.z).inflate(0.004);
-        LevelRenderer.renderLineBox(matrices, buffers.getBuffer(RenderType.lines()), box, 1.0f, 0.75f, 0.1f, 1.0f);
+        ShapeRenderer.renderLineBox(matrices, buffers.getBuffer(RenderType.lines()), box, 1.0f, 0.75f, 0.1f, 1.0f);
     }
 
     private static void renderSelection(
@@ -149,7 +149,7 @@ public final class PreviewRenderer {
         for (BlockPos position : selection.positions()) {
             boolean unmovable = MoveValidator.isUnmovable(client.level.getBlockState(position));
             AABB box = new AABB(position).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
-            LevelRenderer.renderLineBox(
+            ShapeRenderer.renderLineBox(
                     matrices,
                     buffers.getBuffer(RenderType.lines()),
                     box,

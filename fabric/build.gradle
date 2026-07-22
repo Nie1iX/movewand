@@ -1,5 +1,5 @@
 plugins {
-	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+	id 'fabric-loom' version "${loom_version}"
 }
 
 repositories {
@@ -20,15 +20,6 @@ loom {
 			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}
-	}
-}
-
-fabricApi {
-	configureTests {
-		createSourceSet = true
-		modId = "movewand-gametest"
-		enableClientGameTests = false
-		eula = true
 	}
 }
 

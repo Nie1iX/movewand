@@ -5,9 +5,9 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -31,7 +31,7 @@ import java.util.Map;
 
 public final class PreviewRenderer {
     private static final int GHOST_ALPHA = 96;
-    private static final RenderType GHOST_RENDER_TYPE = RenderType.entityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
+    private static final RenderType GHOST_RENDER_TYPE = RenderType.itemEntityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
 
     private PreviewRenderer() {
     }
@@ -86,7 +86,7 @@ public final class PreviewRenderer {
             float green = valid ? 0.45f : 0.1f;
             float blue = valid ? 1.0f : 0.1f;
             AABB box = new AABB(target).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
-            LevelRenderer.renderLineBox(
+            ShapeRenderer.renderLineBox(
                     context.matrixStack(),
                     context.consumers().getBuffer(RenderType.lines()),
                     box,
@@ -183,7 +183,7 @@ public final class PreviewRenderer {
             BlockPos corner
     ) {
         AABB box = new AABB(corner).move(-camera.x, -camera.y, -camera.z).inflate(0.004);
-        LevelRenderer.renderLineBox(
+        ShapeRenderer.renderLineBox(
                 context.matrixStack(),
                 context.consumers().getBuffer(RenderType.lines()),
                 box,
@@ -199,7 +199,7 @@ public final class PreviewRenderer {
         for (BlockPos position : selection.positions()) {
             boolean unmovable = MoveValidator.isUnmovable(context.world().getBlockState(position));
             AABB box = new AABB(position).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
-            LevelRenderer.renderLineBox(
+            ShapeRenderer.renderLineBox(
                     context.matrixStack(),
                     context.consumers().getBuffer(RenderType.lines()),
                     box,
