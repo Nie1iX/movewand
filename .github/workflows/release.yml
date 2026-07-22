@@ -22,7 +22,7 @@ jobs:
           cache: gradle
 
       - name: Build loader variants
-        run: ./gradlew build --no-daemon --max-workers=1 --console=plain
+        run: ./gradlew :fabric:build :neoforge:assemble --no-daemon --max-workers=1 --console=plain
 
       - name: Create GitHub Release
         env:
