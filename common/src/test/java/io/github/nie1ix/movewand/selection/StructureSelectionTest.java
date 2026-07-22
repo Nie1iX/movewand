@@ -41,10 +41,10 @@ class StructureSelectionTest {
         Bootstrap.bootStrap();
         BlockPos foot = new BlockPos(2, 4, 6);
         BlockPos head = foot.north();
-        BlockState footState = Blocks.BED.red().defaultBlockState()
+        BlockState footState = Blocks.RED_BED.defaultBlockState()
                 .setValue(BedBlock.FACING, Direction.NORTH)
                 .setValue(BedBlock.PART, BedPart.FOOT);
-        BlockState headState = Blocks.BED.red().defaultBlockState()
+        BlockState headState = Blocks.RED_BED.defaultBlockState()
                 .setValue(BedBlock.FACING, Direction.NORTH)
                 .setValue(BedBlock.PART, BedPart.HEAD);
 

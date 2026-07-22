@@ -18,7 +18,7 @@ final class KeyboardHandlerMixin {
         Minecraft minecraft = Minecraft.getInstance();
         if (event.key() == GLFW.GLFW_KEY_ESCAPE
                 && action == GLFW.GLFW_PRESS
-                && minecraft.gui.screen() == null
+                && minecraft.screen == null
                 && minecraft.player != null
                 && minecraft.player.getMainHandItem().is(ModItems.moveWand())
                 && TransformPreview.isActive()) {

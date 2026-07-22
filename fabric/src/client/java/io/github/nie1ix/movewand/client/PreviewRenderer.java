@@ -1,6 +1,7 @@
 package io.github.nie1ix.movewand.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.nie1ix.movewand.move.MoveProjection;
 import io.github.nie1ix.movewand.move.MoveValidator;
 import io.github.nie1ix.movewand.registry.ModItems;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
+import org.joml.Vector3f;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -140,15 +142,26 @@ public final class PreviewRenderer {
         PoseStack poseStack = context.poseStack();
         poseStack.pushPose();
         translateToBlock(poseStack, position, camera);
-        context.submitNodeCollector().submitShapeOutline(
+        context.submitNodeCollector().submitCustomGeometry(
                 poseStack,
-                Shapes.block(),
                 RenderTypes.lines(),
-                color,
-                lineWidth,
-                true
+                (pose, vertices) -> renderOutline(vertices, pose, color, lineWidth)
         );
         poseStack.popPose();
+    }
+
+    private static void renderOutline(VertexConsumer vertices, PoseStack.Pose pose, int color, float lineWidth) {
+        Shapes.block().forAllEdges((x1, y1, z1, x2, y2, z2) -> {
+            Vector3f normal = new Vector3f((float) (x2 - x1), (float) (y2 - y1), (float) (z2 - z1)).normalize();
+            vertices.addVertex(pose, (float) x1, (float) y1, (float) z1)
+                    .setColor(color)
+                    .setNormal(pose, normal)
+                    .setLineWidth(lineWidth);
+            vertices.addVertex(pose, (float) x2, (float) y2, (float) z2)
+                    .setColor(color)
+                    .setNormal(pose, normal)
+                    .setLineWidth(lineWidth);
+        });
     }
 
     private static void translateToBlock(PoseStack poseStack, BlockPos position, Vec3 camera) {

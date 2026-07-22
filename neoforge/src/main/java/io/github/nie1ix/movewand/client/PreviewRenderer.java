@@ -37,7 +37,7 @@ public final class PreviewRenderer {
             return;
         }
 
-        try (Gizmos.TemporaryCollection ignored = event.getLevelRenderer().collectPerFrameRenderThreadGizmos()) {
+        try (Gizmos.TemporaryCollection ignored = event.getLevelRenderer().collectPerFrameGizmos()) {
             ClientSelectionHandler.pendingBoxCorner().ifPresent(corner -> Gizmos.cuboid(corner, PENDING_CORNER_STYLE));
             ClientSelectionHandler.selection().ifPresent(selection -> {
                 if (TransformPreview.isActive()) {
