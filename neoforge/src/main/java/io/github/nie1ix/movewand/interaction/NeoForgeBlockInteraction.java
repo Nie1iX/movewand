@@ -2,7 +2,7 @@ package io.github.nie1ix.movewand.interaction;
 
 import io.github.nie1ix.movewand.item.MoveWandItem;
 import io.github.nie1ix.movewand.registry.ModItems;
-import net.neoforged.neoforge.common.util.TriState;
+import net.minecraft.util.TriState;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 public final class NeoForgeBlockInteraction {
