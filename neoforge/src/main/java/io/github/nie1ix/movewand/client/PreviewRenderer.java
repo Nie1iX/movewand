@@ -20,7 +20,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -64,10 +63,6 @@ public final class PreviewRenderer {
 
     static int ghostAlpha(int alpha) {
         return Math.min(alpha, GHOST_ALPHA);
-    }
-
-    static boolean usesBlockAtlasGhost(RenderShape renderShape) {
-        return renderShape != RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     private static void renderPreview(
@@ -116,7 +111,6 @@ public final class PreviewRenderer {
     ) {
         VertexConsumer vertices = new AlphaVertexConsumer(buffers.getBuffer(RenderType.itemEntityTranslucentCull(TextureAtlas.LOCATION_BLOCKS)));
         MultiBufferSource blockAtlasBuffers = ignored -> vertices;
-        MultiBufferSource nativeBuffers = renderType -> new AlphaVertexConsumer(buffers.getBuffer(renderType));
 
         for (Map.Entry<BlockPos, BlockPos> entry : targets.entrySet()) {
             BlockPos target = entry.getValue();
@@ -126,7 +120,7 @@ public final class PreviewRenderer {
             blockRenderer.renderSingleBlock(
                     state,
                     matrices,
-                    usesBlockAtlasGhost(state.getRenderShape()) ? blockAtlasBuffers : nativeBuffers,
+                    blockAtlasBuffers,
                     LightTexture.FULL_BRIGHT,
                     OverlayTexture.NO_OVERLAY
             );
