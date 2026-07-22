@@ -13,12 +13,14 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.TagValueInput;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +36,7 @@ public final class MoveEngine {
     }
 
     public static void move(ServerPlayer player, BlockSelection selected, int x, int y, int z, int turns) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         Set<BlockPos> selectedPositions = selected.positions().stream()
                 .filter(position -> !level.getBlockState(position).isAir())
                 .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
@@ -124,10 +126,11 @@ public final class MoveEngine {
         for (Map.Entry<BlockPos, CompoundTag> entry : blockEntityData.entrySet()) {
             BlockEntity blockEntity = level.getBlockEntity(destinations.get(entry.getKey()));
             if (blockEntity != null) {
-                blockEntity.loadWithComponents(
-                        relocatedBlockEntityData(entry.getValue(), destinations.get(entry.getKey())),
-                        level.registryAccess()
-                );
+                blockEntity.loadWithComponents(TagValueInput.create(
+                        ProblemReporter.DISCARDING,
+                        level.registryAccess(),
+                        relocatedBlockEntityData(entry.getValue(), destinations.get(entry.getKey()))
+                ));
                 blockEntity.setChanged();
             }
         }

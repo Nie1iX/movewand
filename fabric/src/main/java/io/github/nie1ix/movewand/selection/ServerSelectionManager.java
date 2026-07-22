@@ -29,8 +29,8 @@ public final class ServerSelectionManager {
         if (individualBlock) {
             editor.toggleBlocks(
                     MoveHooks.expandSelection(
-                            player.serverLevel(),
-                            StructureSelection.expandPairedBlocks(Set.of(position), player.serverLevel()::getBlockState)
+                            player.level(),
+                            StructureSelection.expandPairedBlocks(Set.of(position), player.level()::getBlockState)
                     ),
                     position
             );
@@ -70,8 +70,8 @@ public final class ServerSelectionManager {
     private static void showSelectionSize(ServerPlayer player, SelectionEditor editor) {
         int size = editor.selection()
                 .map(selection -> MoveHooks.expandSelection(
-                        player.serverLevel(),
-                        StructureSelection.expandPairedBlocks(selection.positions(), player.serverLevel()::getBlockState)
+                        player.level(),
+                        StructureSelection.expandPairedBlocks(selection.positions(), player.level()::getBlockState)
                 ).size())
                 .orElse(0);
         player.displayClientMessage(selectionSizeMessage(size), true);
@@ -88,8 +88,8 @@ public final class ServerSelectionManager {
     private static boolean expandPairedBlocks(ServerPlayer player, SelectionEditor editor) {
         return editor.selection().map(selection -> editor.replace(BlockSelection.of(
                 MoveHooks.expandSelection(
-                        player.serverLevel(),
-                        StructureSelection.expandPairedBlocks(selection.positions(), player.serverLevel()::getBlockState)
+                        player.level(),
+                        StructureSelection.expandPairedBlocks(selection.positions(), player.level()::getBlockState)
                 ),
                 selection.pivot()
         ))).orElse(true);

@@ -34,11 +34,7 @@ public final class PreviewRenderer {
     private PreviewRenderer() {
     }
 
-    public static void render(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-            return;
-        }
-
+    public static void render(RenderLevelStageEvent.AfterEntities event) {
         Minecraft client = Minecraft.getInstance();
         if (client.level == null || client.player == null || !shouldRenderSelection(client.player.getMainHandItem(), ModItems.moveWand())) {
             return;
