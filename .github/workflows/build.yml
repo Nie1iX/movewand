@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [main]
+    branches: [26.1.2]
   pull_request:
-    branches: [main]
+    branches: [26.1.2]
   workflow_dispatch:
 
 permissions:
@@ -29,7 +29,7 @@ jobs:
       - name: Upload mod JARs
         uses: actions/upload-artifact@v4
         with:
-          name: movewand-mc26.2
+          name: movewand-mc26.1.2
           path: |
             build/mods/*-fabric-*.jar
             build/mods/*-neoforge-*.jar
