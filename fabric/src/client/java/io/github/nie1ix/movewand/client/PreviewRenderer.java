@@ -2,7 +2,6 @@ package io.github.nie1ix.movewand.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -35,59 +34,62 @@ public final class PreviewRenderer {
     private PreviewRenderer() {
     }
 
-    public static void initialize() {
-        WorldRenderEvents.AFTER_ENTITIES.register(context -> {
-            if (context.world() == null || context.matrixStack() == null || context.consumers() == null) {
-                return;
-            }
-            if (Minecraft.getInstance().player == null
-                    || !shouldRenderSelection(Minecraft.getInstance().player.getMainHandItem(), ModItems.moveWand())) {
-                return;
-            }
+    public static void render() {
+        Minecraft client = Minecraft.getInstance();
+        if (client.level == null || client.player == null || !shouldRenderSelection(client.player.getMainHandItem(), ModItems.moveWand())) {
+            return;
+        }
 
-            Vec3 camera = context.camera().getPosition();
-            ClientSelectionHandler.pendingBoxCorner().ifPresent(corner -> renderPendingBoxCorner(context, camera, corner));
-            ClientSelectionHandler.selection().ifPresent(selection -> {
-                if (TransformPreview.isActive()) {
-                    renderPreview(context, selection);
-                } else {
-                    renderSelection(context, selection);
-                }
-            });
+        PoseStack matrices = new PoseStack();
+        MultiBufferSource.BufferSource buffers = client.renderBuffers().bufferSource();
+        Vec3 camera = client.gameRenderer.getMainCamera().getPosition();
+        ClientSelectionHandler.pendingBoxCorner().ifPresent(corner -> renderPendingBoxCorner(matrices, buffers, camera, corner));
+        ClientSelectionHandler.selection().ifPresent(selection -> {
+            if (TransformPreview.isActive()) {
+                renderPreview(matrices, buffers, client, camera, selection);
+            } else {
+                renderSelection(matrices, buffers, client, camera, selection);
+            }
         });
+        buffers.endBatch();
     }
 
     static boolean shouldRenderSelection(ItemStack mainHandItem, Item moveWand) {
         return mainHandItem.is(moveWand);
     }
 
-    private static void renderPreview(net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context, BlockSelection selection) {
+    private static void renderPreview(
+            PoseStack matrices,
+            MultiBufferSource.BufferSource buffers,
+            Minecraft client,
+            Vec3 camera,
+            BlockSelection selection
+    ) {
         BlockPos offset = TransformPreview.offset();
         Map<BlockPos, BlockPos> targets = SelectionTransform.transformMap(selection, offset, TransformPreview.clockwiseTurns());
         Map<BlockPos, BlockState> states = new LinkedHashMap<>();
         for (BlockPos source : targets.keySet()) {
             states.put(source, BlockStateTransform.rotateY(
-                    context.world().getBlockState(source),
+                    client.level.getBlockState(source),
                     TransformPreview.clockwiseTurns()
             ));
         }
-        LevelReader projectedLevel = MoveProjection.levelAfterMove(context.world(), states, targets);
+        LevelReader projectedLevel = MoveProjection.levelAfterMove(client.level, states, targets);
         boolean withinRange = TransformPreview.isOffsetWithinRange(offset);
-        Vec3 camera = context.camera().getPosition();
-        renderGhostBlocks(context, targets, states, camera);
+        renderGhostBlocks(matrices, buffers, client.getBlockRenderer(), targets, states, camera);
 
         for (Map.Entry<BlockPos, BlockPos> entry : targets.entrySet()) {
             BlockPos target = entry.getValue();
             BlockState state = states.get(entry.getKey());
-            boolean emptyOrOverlapping = selection.positions().contains(target) || context.world().getBlockState(target).isAir();
+            boolean emptyOrOverlapping = selection.positions().contains(target) || client.level.getBlockState(target).isAir();
             boolean valid = withinRange && emptyOrOverlapping && state.canSurvive(projectedLevel, target);
             float red = valid ? 0.1f : 1.0f;
             float green = valid ? 0.45f : 0.1f;
             float blue = valid ? 1.0f : 0.1f;
             AABB box = new AABB(target).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
             ShapeRenderer.renderLineBox(
-                    context.matrixStack(),
-                    context.consumers().getBuffer(RenderType.lines()),
+                    matrices.last(),
+                    buffers.getBuffer(RenderType.lines()),
                     box,
                     red,
                     green,
@@ -98,15 +100,15 @@ public final class PreviewRenderer {
     }
 
     private static void renderGhostBlocks(
-            net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context,
+            PoseStack matrices,
+            MultiBufferSource.BufferSource buffers,
+            BlockRenderDispatcher blockRenderer,
             Map<BlockPos, BlockPos> targets,
             Map<BlockPos, BlockState> states,
             Vec3 camera
     ) {
-        VertexConsumer vertices = new AlphaVertexConsumer(context.consumers().getBuffer(GHOST_RENDER_TYPE));
+        VertexConsumer vertices = new AlphaVertexConsumer(buffers.getBuffer(GHOST_RENDER_TYPE));
         MultiBufferSource blockAtlasBuffers = ignored -> vertices;
-        BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
-        PoseStack matrices = context.matrixStack();
 
         for (Map.Entry<BlockPos, BlockPos> entry : targets.entrySet()) {
             BlockPos target = entry.getValue();
@@ -172,14 +174,15 @@ public final class PreviewRenderer {
     }
 
     private static void renderPendingBoxCorner(
-            net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context,
+            PoseStack matrices,
+            MultiBufferSource.BufferSource buffers,
             Vec3 camera,
             BlockPos corner
     ) {
         AABB box = new AABB(corner).move(-camera.x, -camera.y, -camera.z).inflate(0.004);
         ShapeRenderer.renderLineBox(
-                context.matrixStack(),
-                context.consumers().getBuffer(RenderType.lines()),
+                matrices.last(),
+                buffers.getBuffer(RenderType.lines()),
                 box,
                 1.0f,
                 0.75f,
@@ -188,14 +191,19 @@ public final class PreviewRenderer {
         );
     }
 
-    private static void renderSelection(net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context, BlockSelection selection) {
-        Vec3 camera = context.camera().getPosition();
+    private static void renderSelection(
+            PoseStack matrices,
+            MultiBufferSource.BufferSource buffers,
+            Minecraft client,
+            Vec3 camera,
+            BlockSelection selection
+    ) {
         for (BlockPos position : selection.positions()) {
-            boolean unmovable = MoveValidator.isUnmovable(context.world().getBlockState(position));
+            boolean unmovable = MoveValidator.isUnmovable(client.level.getBlockState(position));
             AABB box = new AABB(position).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
             ShapeRenderer.renderLineBox(
-                    context.matrixStack(),
-                    context.consumers().getBuffer(RenderType.lines()),
+                    matrices.last(),
+                    buffers.getBuffer(RenderType.lines()),
                     box,
                     unmovable ? 1.0f : 0.2f,
                     unmovable ? 0.25f : 0.8f,

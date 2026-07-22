@@ -1,6 +1,6 @@
 {
   "item.movewand.move_wand": "Жезл перемещения",
-  "key.categories.movewand": "MoveWand",
+  "key.category.movewand.main": "MoveWand",
   "key.movewand.move_forward": "Переместить выделение вперёд",
   "key.movewand.move_backward": "Переместить выделение назад",
   "key.movewand.move_left": "Переместить выделение влево",

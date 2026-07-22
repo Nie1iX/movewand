@@ -9,7 +9,6 @@ public final class MoveWandClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         MoveKeyBindings.initialize();
-        PreviewRenderer.initialize();
         ClientPlayNetworking.registerGlobalReceiver(SelectionUpdatedPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> ClientSelectionHandler.replace(payload))
         );

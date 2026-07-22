@@ -20,7 +20,7 @@ public final class MoveWand {
         modEventBus.addListener(MoveWandNetworking::registerPayloads);
         NeoForge.EVENT_BUS.addListener(ServerSelectionManager::onPlayerLoggedOut);
         NeoForge.EVENT_BUS.addListener(NeoForgeBlockInteraction::onRightClickBlock);
-        if (FMLEnvironment.dist == Dist.CLIENT) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             MoveWandClient.initialize(modEventBus);
         }
     }

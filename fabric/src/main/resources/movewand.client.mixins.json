@@ -3,7 +3,8 @@
   "package": "io.github.nie1ix.movewand.client.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "KeyboardHandlerMixin"
+    "KeyboardHandlerMixin",
+    "LevelRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

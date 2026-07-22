@@ -1,12 +1,14 @@
 package io.github.nie1ix.movewand.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import io.github.nie1ix.movewand.MoveWand;
 import io.github.nie1ix.movewand.network.ClearSelectionPayload;
 import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.transform.RelativeMove;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
@@ -15,7 +17,9 @@ import org.lwjgl.glfw.GLFW;
 import java.util.List;
 
 public final class MoveKeyBindings {
-    private static final String CATEGORY = "key.categories.movewand";
+    private static final KeyMapping.Category CATEGORY = new KeyMapping.Category(
+            ResourceLocation.fromNamespaceAndPath(MoveWand.MOD_ID, "main")
+    );
     private static final KeyMapping FORWARD = key("key.movewand.move_forward", GLFW.GLFW_KEY_UP);
     private static final KeyMapping BACKWARD = key("key.movewand.move_backward", GLFW.GLFW_KEY_DOWN);
     private static final KeyMapping LEFT = key("key.movewand.move_left", GLFW.GLFW_KEY_LEFT);
@@ -32,6 +36,7 @@ public final class MoveKeyBindings {
     }
 
     public static void register(RegisterKeyMappingsEvent event) {
+        event.registerCategory(CATEGORY);
         all().forEach(event::register);
     }
 

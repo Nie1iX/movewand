@@ -1,6 +1,6 @@
 {
   "item.movewand.move_wand": "MoveWand",
-  "key.categories.movewand": "MoveWand",
+  "key.category.movewand.main": "MoveWand",
   "key.movewand.move_forward": "Move selection forward",
   "key.movewand.move_backward": "Move selection backward",
   "key.movewand.move_left": "Move selection left",

@@ -41,7 +41,7 @@ public final class PreviewRenderer {
         }
 
         MultiBufferSource.BufferSource buffers = client.renderBuffers().bufferSource();
-        Vec3 camera = event.getCamera().getPosition();
+        Vec3 camera = client.gameRenderer.getMainCamera().getPosition();
         ClientSelectionHandler.pendingBoxCorner().ifPresent(corner -> renderPendingBoxCorner(event.getPoseStack(), buffers, camera, corner));
         ClientSelectionHandler.selection().ifPresent(selection -> {
             if (TransformPreview.isActive()) {
@@ -86,7 +86,7 @@ public final class PreviewRenderer {
             boolean valid = withinRange && emptyOrOverlapping && state.canSurvive(projectedLevel, target);
             AABB box = new AABB(target).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
             ShapeRenderer.renderLineBox(
-                    matrices,
+                    matrices.last(),
                     buffers.getBuffer(RenderType.lines()),
                     box,
                     valid ? 0.1f : 1.0f,
@@ -126,7 +126,7 @@ public final class PreviewRenderer {
 
     private static void renderPendingBoxCorner(PoseStack matrices, MultiBufferSource buffers, Vec3 camera, BlockPos corner) {
         AABB box = new AABB(corner).move(-camera.x, -camera.y, -camera.z).inflate(0.004);
-        ShapeRenderer.renderLineBox(matrices, buffers.getBuffer(RenderType.lines()), box, 1.0f, 0.75f, 0.1f, 1.0f);
+        ShapeRenderer.renderLineBox(matrices.last(), buffers.getBuffer(RenderType.lines()), box, 1.0f, 0.75f, 0.1f, 1.0f);
     }
 
     private static void renderSelection(
@@ -140,7 +140,7 @@ public final class PreviewRenderer {
             boolean unmovable = MoveValidator.isUnmovable(client.level.getBlockState(position));
             AABB box = new AABB(position).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
             ShapeRenderer.renderLineBox(
-                    matrices,
+                    matrices.last(),
                     buffers.getBuffer(RenderType.lines()),
                     box,
                     unmovable ? 1.0f : 0.2f,
