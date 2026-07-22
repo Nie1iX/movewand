@@ -2,7 +2,7 @@ package io.github.nie1ix.movewand.registry;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import io.github.nie1ix.movewand.MoveWand;
 import io.github.nie1ix.movewand.item.MoveWandItem;
@@ -21,6 +21,6 @@ public final class ModItems {
     }
 
     private static Item register(String path, Item item) {
-        return Registry.register(BuiltInRegistries.ITEM, ResourceLocation.fromNamespaceAndPath(MoveWand.MOD_ID, path), item);
+        return Registry.register(BuiltInRegistries.ITEM, Identifier.fromNamespaceAndPath(MoveWand.MOD_ID, path), item);
     }
 }

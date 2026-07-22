@@ -5,7 +5,7 @@ import io.github.nie1ix.movewand.MoveWand;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.network.ClearSelectionPayload;
@@ -15,7 +15,7 @@ import java.util.List;
 
 public final class MoveKeyBindings {
     private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(
-            ResourceLocation.fromNamespaceAndPath(MoveWand.MOD_ID, "main")
+            Identifier.fromNamespaceAndPath(MoveWand.MOD_ID, "main")
     );
     private static final KeyMapping FORWARD = register("key.movewand.move_forward", GLFW.GLFW_KEY_UP);
     private static final KeyMapping BACKWARD = register("key.movewand.move_backward", GLFW.GLFW_KEY_DOWN);

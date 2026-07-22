@@ -2,7 +2,7 @@ package io.github.nie1ix.movewand.move;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -17,19 +17,19 @@ public final class MoveValidator {
     public static final int MAX_SELECTION_BLOCKS = SelectionEditor.DEFAULT_MAX_POSITIONS;
     private static final TagKey<Block> RELOCATION_NOT_SUPPORTED = TagKey.create(
             Registries.BLOCK,
-            ResourceLocation.fromNamespaceAndPath("c", "relocation_not_supported")
+            Identifier.fromNamespaceAndPath("c", "relocation_not_supported")
     );
     private static final TagKey<Block> MOVEWAND_RELOCATION_NOT_SUPPORTED = TagKey.create(
             Registries.BLOCK,
-            ResourceLocation.fromNamespaceAndPath("movewand", "relocation_not_supported")
+            Identifier.fromNamespaceAndPath("movewand", "relocation_not_supported")
     );
     private static final TagKey<Block> CREATE_NON_MOVABLE = TagKey.create(
             Registries.BLOCK,
-            ResourceLocation.fromNamespaceAndPath("create", "non_movable")
+            Identifier.fromNamespaceAndPath("create", "non_movable")
     );
     private static final TagKey<Block> FORGE_RELOCATION_NOT_SUPPORTED = TagKey.create(
             Registries.BLOCK,
-            ResourceLocation.fromNamespaceAndPath("forge", "relocation_not_supported")
+            Identifier.fromNamespaceAndPath("forge", "relocation_not_supported")
     );
 
     private MoveValidator() {

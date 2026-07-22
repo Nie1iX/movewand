@@ -11,12 +11,13 @@ import io.github.nie1ix.movewand.transform.SelectionTransform;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
@@ -41,7 +42,7 @@ public final class PreviewRenderer {
         }
 
         MultiBufferSource.BufferSource buffers = client.renderBuffers().bufferSource();
-        Vec3 camera = client.gameRenderer.getMainCamera().getPosition();
+        Vec3 camera = client.gameRenderer.getMainCamera().position();
         ClientSelectionHandler.pendingBoxCorner().ifPresent(corner -> renderPendingBoxCorner(event.getPoseStack(), buffers, camera, corner));
         ClientSelectionHandler.selection().ifPresent(selection -> {
             if (TransformPreview.isActive()) {
@@ -85,9 +86,9 @@ public final class PreviewRenderer {
             boolean emptyOrOverlapping = selection.positions().contains(target) || client.level.getBlockState(target).isAir();
             boolean valid = withinRange && emptyOrOverlapping && state.canSurvive(projectedLevel, target);
             AABB box = new AABB(target).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
-            ShapeRenderer.renderLineBox(
-                    matrices.last(),
-                    buffers.getBuffer(RenderType.lines()),
+            renderLineBox(
+                    matrices,
+                    buffers,
                     box,
                     valid ? 0.1f : 1.0f,
                     valid ? 0.45f : 0.1f,
@@ -105,7 +106,7 @@ public final class PreviewRenderer {
             Map<BlockPos, BlockState> states,
             Vec3 camera
     ) {
-        VertexConsumer vertices = new AlphaVertexConsumer(buffers.getBuffer(RenderType.itemEntityTranslucentCull(TextureAtlas.LOCATION_BLOCKS)));
+        VertexConsumer vertices = new AlphaVertexConsumer(buffers.getBuffer(RenderTypes.itemEntityTranslucentCull(TextureAtlas.LOCATION_BLOCKS)));
         MultiBufferSource blockAtlasBuffers = ignored -> vertices;
 
         for (Map.Entry<BlockPos, BlockPos> entry : targets.entrySet()) {
@@ -126,7 +127,7 @@ public final class PreviewRenderer {
 
     private static void renderPendingBoxCorner(PoseStack matrices, MultiBufferSource buffers, Vec3 camera, BlockPos corner) {
         AABB box = new AABB(corner).move(-camera.x, -camera.y, -camera.z).inflate(0.004);
-        ShapeRenderer.renderLineBox(matrices.last(), buffers.getBuffer(RenderType.lines()), box, 1.0f, 0.75f, 0.1f, 1.0f);
+        renderLineBox(matrices, buffers, box, 1.0f, 0.75f, 0.1f, 1.0f);
     }
 
     private static void renderSelection(
@@ -139,9 +140,9 @@ public final class PreviewRenderer {
         for (BlockPos position : selection.positions()) {
             boolean unmovable = MoveValidator.isUnmovable(client.level.getBlockState(position));
             AABB box = new AABB(position).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
-            ShapeRenderer.renderLineBox(
-                    matrices.last(),
-                    buffers.getBuffer(RenderType.lines()),
+            renderLineBox(
+                    matrices,
+                    buffers,
                     box,
                     unmovable ? 1.0f : 0.2f,
                     unmovable ? 0.25f : 0.8f,
@@ -149,6 +150,19 @@ public final class PreviewRenderer {
                     unmovable ? 0.8f : 0.45f
             );
         }
+    }
+
+    private static void renderLineBox(PoseStack matrices, MultiBufferSource buffers, AABB box, float red, float green, float blue, float alpha) {
+        ShapeRenderer.renderShape(
+                matrices,
+                buffers.getBuffer(RenderTypes.lines()),
+                net.minecraft.world.phys.shapes.Shapes.create(box),
+                0.0,
+                0.0,
+                0.0,
+                ARGB.colorFromFloat(alpha, red, green, blue),
+                1.0f
+        );
     }
 
     private static final class AlphaVertexConsumer implements VertexConsumer {
@@ -167,6 +181,12 @@ public final class PreviewRenderer {
         @Override
         public VertexConsumer setColor(int red, int green, int blue, int alpha) {
             delegate.setColor(red, green, blue, ghostAlpha(alpha));
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setColor(int color) {
+            delegate.setColor(ARGB.color(ghostAlpha(ARGB.alpha(color)), color));
             return this;
         }
 
@@ -191,6 +211,12 @@ public final class PreviewRenderer {
         @Override
         public VertexConsumer setNormal(float x, float y, float z) {
             delegate.setNormal(x, y, z);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setLineWidth(float width) {
+            delegate.setLineWidth(width);
             return this;
         }
     }

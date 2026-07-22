@@ -10,7 +10,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.Filterable;
@@ -45,12 +45,12 @@ public final class MoveBlockEntityGameTest implements ModInitializer, FabricGame
     private static final String TEST_NAMESPACE = "movewand_gametest";
     private static final Block TEST_BLOCK = Registry.register(
             BuiltInRegistries.BLOCK,
-            ResourceLocation.fromNamespaceAndPath(TEST_NAMESPACE, "data_block"),
+            Identifier.fromNamespaceAndPath(TEST_NAMESPACE, "data_block"),
             new DataBlock(BlockBehaviour.Properties.of())
     );
     private static final BlockEntityType<DataBlockEntity> TEST_BLOCK_ENTITY = Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE,
-            ResourceLocation.fromNamespaceAndPath(TEST_NAMESPACE, "data_block"),
+            Identifier.fromNamespaceAndPath(TEST_NAMESPACE, "data_block"),
             BlockEntityType.Builder.of(DataBlockEntity::new, TEST_BLOCK).build(null)
     );
 

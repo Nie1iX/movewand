@@ -19,6 +19,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.attribute.EnvironmentAttributeReader;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -132,5 +133,10 @@ final class ProjectedLevelReader implements LevelReader {
     @Override
     public FeatureFlagSet enabledFeatures() {
         return delegate.enabledFeatures();
+    }
+
+    @Override
+    public EnvironmentAttributeReader environmentAttributes() {
+        return delegate.environmentAttributes();
     }
 }

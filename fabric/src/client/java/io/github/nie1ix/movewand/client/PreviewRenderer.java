@@ -5,12 +5,14 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
@@ -29,7 +31,7 @@ import java.util.Map;
 
 public final class PreviewRenderer {
     private static final int GHOST_ALPHA = 96;
-    private static final RenderType GHOST_RENDER_TYPE = RenderType.itemEntityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
+    private static final RenderType GHOST_RENDER_TYPE = RenderTypes.itemEntityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
 
     private PreviewRenderer() {
     }
@@ -42,7 +44,7 @@ public final class PreviewRenderer {
 
         PoseStack matrices = new PoseStack();
         MultiBufferSource.BufferSource buffers = client.renderBuffers().bufferSource();
-        Vec3 camera = client.gameRenderer.getMainCamera().getPosition();
+        Vec3 camera = client.gameRenderer.getMainCamera().position();
         ClientSelectionHandler.pendingBoxCorner().ifPresent(corner -> renderPendingBoxCorner(matrices, buffers, camera, corner));
         ClientSelectionHandler.selection().ifPresent(selection -> {
             if (TransformPreview.isActive()) {
@@ -87,15 +89,7 @@ public final class PreviewRenderer {
             float green = valid ? 0.45f : 0.1f;
             float blue = valid ? 1.0f : 0.1f;
             AABB box = new AABB(target).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
-            ShapeRenderer.renderLineBox(
-                    matrices.last(),
-                    buffers.getBuffer(RenderType.lines()),
-                    box,
-                    red,
-                    green,
-                    blue,
-                    0.8f
-            );
+            renderLineBox(matrices, buffers, box, red, green, blue, 0.8f);
         }
     }
 
@@ -149,6 +143,12 @@ public final class PreviewRenderer {
         }
 
         @Override
+        public VertexConsumer setColor(int color) {
+            delegate.setColor(ARGB.color(ghostAlpha(ARGB.alpha(color)), color));
+            return this;
+        }
+
+        @Override
         public VertexConsumer setUv(float u, float v) {
             delegate.setUv(u, v);
             return this;
@@ -171,6 +171,12 @@ public final class PreviewRenderer {
             delegate.setNormal(x, y, z);
             return this;
         }
+
+        @Override
+        public VertexConsumer setLineWidth(float width) {
+            delegate.setLineWidth(width);
+            return this;
+        }
     }
 
     private static void renderPendingBoxCorner(
@@ -180,15 +186,7 @@ public final class PreviewRenderer {
             BlockPos corner
     ) {
         AABB box = new AABB(corner).move(-camera.x, -camera.y, -camera.z).inflate(0.004);
-        ShapeRenderer.renderLineBox(
-                matrices.last(),
-                buffers.getBuffer(RenderType.lines()),
-                box,
-                1.0f,
-                0.75f,
-                0.1f,
-                1.0f
-        );
+        renderLineBox(matrices, buffers, box, 1.0f, 0.75f, 0.1f, 1.0f);
     }
 
     private static void renderSelection(
@@ -201,9 +199,9 @@ public final class PreviewRenderer {
         for (BlockPos position : selection.positions()) {
             boolean unmovable = MoveValidator.isUnmovable(client.level.getBlockState(position));
             AABB box = new AABB(position).move(-camera.x, -camera.y, -camera.z).inflate(0.002);
-            ShapeRenderer.renderLineBox(
-                    matrices.last(),
-                    buffers.getBuffer(RenderType.lines()),
+            renderLineBox(
+                    matrices,
+                    buffers,
                     box,
                     unmovable ? 1.0f : 0.2f,
                     unmovable ? 0.25f : 0.8f,
@@ -211,5 +209,18 @@ public final class PreviewRenderer {
                     unmovable ? 0.8f : 0.45f
             );
         }
+    }
+
+    private static void renderLineBox(PoseStack matrices, MultiBufferSource buffers, AABB box, float red, float green, float blue, float alpha) {
+        ShapeRenderer.renderShape(
+                matrices,
+                buffers.getBuffer(RenderTypes.lines()),
+                net.minecraft.world.phys.shapes.Shapes.create(box),
+                0.0,
+                0.0,
+                0.0,
+                ARGB.colorFromFloat(alpha, red, green, blue),
+                1.0f
+        );
     }
 }
