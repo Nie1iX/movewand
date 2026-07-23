@@ -2,6 +2,12 @@
 
 This document defines the support boundary for the first public alpha. `GameTest covered` means the named scenario has an automated Minecraft `GameTest`; it is not a substitute for manual multiplayer testing in a backed-up world.
 
+The detailed matrix below is covered by the legacy GameTest suite on the `1.21.1`
+maintenance line. The `26.*` Fabric GameTest suites cover paired doors,
+overlapping carpets, redstone rotation, wall-torch rotation, flowing-water
+destinations, and spawner rejection. The remaining `26.*` cases keep unit-test
+and manual-QA coverage until their GameTests are ported.
+
 ## Current contract
 
 - MoveWand transfers `BlockState` and `BlockEntity` NBT. Before loading NBT at the destination, it writes the destination `x`, `y`, and `z` coordinates.
