@@ -34,6 +34,6 @@ public final class MoveWandClient {
     }
 
     private static void onPlayerLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
-        ClientSelectionHandler.reset();
+        ClientSelectionHandler.reset(TransformPreview::cancel);
     }
 }
