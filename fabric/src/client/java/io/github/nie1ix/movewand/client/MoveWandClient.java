@@ -10,8 +10,8 @@ public final class MoveWandClient implements ClientModInitializer {
     public void onInitializeClient() {
         MoveKeyBindings.initialize();
         ClientPlayNetworking.registerGlobalReceiver(SelectionUpdatedPayload.TYPE, (payload, context) ->
-                context.client().execute(() -> ClientSelectionHandler.replace(payload))
+                context.client().execute(() -> ClientSelectionHandler.replace(payload, TransformPreview::cancel))
         );
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ClientSelectionHandler.reset());
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ClientSelectionHandler.reset(TransformPreview::cancel));
     }
 }

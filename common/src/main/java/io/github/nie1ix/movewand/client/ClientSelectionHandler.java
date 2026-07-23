@@ -1,8 +1,8 @@
 package io.github.nie1ix.movewand.client;
 
-import net.minecraft.core.BlockPos;
 import io.github.nie1ix.movewand.network.SelectionUpdatedPayload;
 import io.github.nie1ix.movewand.selection.BlockSelection;
+import net.minecraft.core.BlockPos;
 
 import java.util.Optional;
 
@@ -21,15 +21,15 @@ public final class ClientSelectionHandler {
         return Optional.ofNullable(pendingBoxCorner);
     }
 
-    public static void replace(SelectionUpdatedPayload payload) {
+    public static void replace(SelectionUpdatedPayload payload, Runnable cancelPreview) {
         selection = payload.positions().isEmpty() ? null : new BlockSelection(payload.positions(), payload.pivot());
         pendingBoxCorner = payload.pendingBoxCorner();
-        TransformPreview.cancel();
+        cancelPreview.run();
     }
 
-    public static void reset() {
+    public static void reset(Runnable cancelPreview) {
         selection = null;
         pendingBoxCorner = null;
-        TransformPreview.cancel();
+        cancelPreview.run();
     }
 }

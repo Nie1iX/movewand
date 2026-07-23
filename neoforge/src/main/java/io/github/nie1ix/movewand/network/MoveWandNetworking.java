@@ -1,6 +1,7 @@
 package io.github.nie1ix.movewand.network;
 
 import io.github.nie1ix.movewand.client.ClientSelectionHandler;
+import io.github.nie1ix.movewand.client.TransformPreview;
 import io.github.nie1ix.movewand.move.MoveService;
 import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.selection.ServerSelectionManager;
@@ -23,7 +24,7 @@ public final class MoveWandNetworking {
             }
         });
         registrar.playToClient(SelectionUpdatedPayload.TYPE, SelectionUpdatedPayload.CODEC, (payload, context) ->
-                ClientSelectionHandler.replace(payload)
+                ClientSelectionHandler.replace(payload, TransformPreview::cancel)
         );
     }
 }
