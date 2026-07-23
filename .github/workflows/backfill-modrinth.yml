@@ -37,9 +37,7 @@ jobs:
             mc26.1.2-1.0.0
             mc26.2-1.0.0
           )
-          modrinth_project_id=$(curl --fail --silent --show-error \
-            -H 'User-Agent: Nie1iX/movewand-release-workflow' \
-            -H "Authorization: ${MODRINTH_TOKEN}" https://api.modrinth.com/v2/project/movewand | jq -er '.id')
+          modrinth_project_id=CiW3JzIW
           existing_versions=$(curl --fail --silent --show-error \
             -H 'User-Agent: Nie1iX/movewand-release-workflow' \
             -H "Authorization: ${MODRINTH_TOKEN}" \

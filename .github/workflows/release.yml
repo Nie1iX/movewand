@@ -47,9 +47,7 @@ jobs:
           minecraft_version=$(perl -ne 'print $1 if /^minecraft_version=(.+)$/' gradle.properties)
           mod_version=$(perl -ne 'print $1 if /^mod_version=(.+)$/' gradle.properties)
           changelog="See https://github.com/${GITHUB_REPOSITORY}/releases/tag/${GITHUB_REF_NAME}"
-          modrinth_project_id=$(curl --fail --silent --show-error \
-            -H 'User-Agent: Nie1iX/movewand-release-workflow' \
-            -H "Authorization: ${MODRINTH_TOKEN}" https://api.modrinth.com/v2/project/movewand | jq -er '.id')
+          modrinth_project_id=CiW3JzIW
 
           publish() {
             local loader="$1"
