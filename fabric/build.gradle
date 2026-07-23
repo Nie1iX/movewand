@@ -13,14 +13,22 @@ base {
 }
 
 loom {
-	splitEnvironmentSourceSets()
+    splitEnvironmentSourceSets()
 
 	mods {
 		movewand {
 			sourceSet sourceSets.main
 			sourceSet sourceSets.client
-		}
-	}
+        }
+    }
+}
+
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = "movewand-gametest"
+        eula = true
+    }
 }
 
 sourceSets.main.java.srcDir '../common/src/main/java'
