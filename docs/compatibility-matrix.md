@@ -2,11 +2,15 @@
 
 This document defines the support boundary for the first public alpha. `GameTest covered` means the named scenario has an automated Minecraft `GameTest`; it is not a substitute for manual multiplayer testing in a backed-up world.
 
-The detailed matrix below is covered by the legacy GameTest suite on the `1.21.1`
-maintenance line. The `26.*` Fabric GameTest suites cover paired doors,
-overlapping carpets, redstone rotation, wall-torch rotation, flowing-water
-destinations, and spawner rejection. The remaining `26.*` cases keep unit-test
-and manual-QA coverage until their GameTests are ported.
+## Automated coverage by version line
+
+| Version lines | GameTest coverage |
+| --- | --- |
+| `1.21.1` | The detailed matrix below, including vanilla block entities and Oritech. |
+| `26.1`–`26.2` Fabric | Paired doors, overlapping carpets, redstone rotation, wall-torch rotation, flowing-water destinations, and spawner rejection. |
+| `26.1`–`26.2` NeoForge | A move/selection-update smoke test with payload negotiation, plus the regular unit tests. |
+
+The remaining `26.*` scenarios keep unit-test and manual-QA coverage until their GameTests are ported.
 
 ## Current contract
 
@@ -19,7 +23,7 @@ and manual-QA coverage until their GameTests are ported.
 - Generic NBT transfer alone is not a compatibility promise for a third-party mod.
 - Optional integrations can expand a selection and rewrite captured `BlockEntity` NBT before it is restored. They are distributed as separate loader-specific addons.
 
-## Matrix
+## `1.21.1` detailed matrix
 
 | Area | Status | Automated coverage | Remaining manual checks |
 | --- | --- | --- | --- |
@@ -35,7 +39,7 @@ and manual-QA coverage until their GameTests are ported.
 | Denylist-tagged blocks | GameTest covered | Rejection for relocation opt-out tags | Mod-specific tag coverage |
 | Oritech `1.2.9` multiblocks | `mc1.21.1` maintenance line only | GameTest: controller/core selection expansion and coordinate-reference NBT rewrite | Translation, rotation, GUI, recipes, reconnect, and multiplayer on Fabric and NeoForge |
 | Create ordinary blocks | No integration claim | Generic denylist is recognized | Kinetic networks, storage, smart blocks, and rotation require a dedicated integration review |
-| AE2 | No integration claim | None | Cables, machines, storage, and network reconnect require a dedicated integration review |
+| AE2 `19.2.x` (NeoForge) | `1.21.1` add-on only | Unit tests: block orientation and CableBus side-NBT rotation | ME Drive/Cell Workbench, terminals, facades, network reconnect, and multiplayer |
 
 ## Verification sequence
 
@@ -59,10 +63,11 @@ Run this checklist on both Fabric and NeoForge in a backed-up world. For every s
 - [ ] Persistence and multiplayer: reconnect after a move; have another player observe the operation; repeat with both players holding or viewing the same container and item frame.
 - [ ] Modded blocks: test each installed mod in a separate world before using it in survival. A passed vanilla case does not imply third-party compatibility.
 - [ ] Oritech `1.2.9` on the `mc1.21.1` maintenance line: with the matching MoveWand Oritech addon installed, select only one controller or core of each tested multiblock. Verify that all of its cores are added to the selection, then test translation, rotation, GUI interaction, active processing, reconnect, and multiplayer observation.
+- [ ] AE2 `19.2.x` on the `mc1.21.1` maintenance line: with the matching NeoForge MoveWand AE2 addon installed, test ME Terminal, ME Drive, Cell Workbench, cables, facades, reconnect, and multiplayer observation after translation and rotation.
 
 ## External contracts used as references
 
 - Movable Block Entities uses `c:relocation_not_supported` as an opt-out contract; MoveWand respects it.
 - Create defines `create:non_movable` and uses `forge:relocation_not_supported` for blocks that must not move; MoveWand respects both. `create:safe_nbt` concerns schematic printing and is not a general relocation guarantee.
-- AE2 exposes a move strategy based on `beginMove` / `completeMove`. Its default path creates a new `BlockEntity` at the target through `loadStatic`, which differs from MoveWand's generic NBT path. MoveWand has no AE2 dependency until an optional integration is verified.
+- AE2 exposes a move strategy based on `beginMove` / `completeMove`. Its default path creates a new `BlockEntity` at the target through `loadStatic`, which differs from MoveWand's generic NBT path. The NeoForge-only `1.21.1` add-on handles the tested orientation and CableBus side-NBT rules; other AE2 behavior remains outside the compatibility promise.
 - WorldEdit moves a selection only with explicit `-s`. MoveWand always moves its selection after a successful operation, because the wand is intended for sequential adjustments to the same group.
