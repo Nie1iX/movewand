@@ -67,7 +67,7 @@ jobs:
               --arg loader "$loader" \
               --arg project_id "$modrinth_project_id" \
               --argjson dependencies "$dependencies" \
-              '{name: $name, version_number: $version, changelog: $changelog, dependencies: $dependencies, game_versions: [$minecraft_version], version_type: "release", loaders: [$loader], project_id: $project_id, file_parts: ["file"], primary_file: "file", environment: "client_and_server"}')
+              '{name: $name, version_number: $version, changelog: $changelog, dependencies: $dependencies, game_versions: [$minecraft_version], version_type: "release", loaders: [$loader], featured: false, project_id: $project_id, file_parts: ["file"], primary_file: "file", environment: "client_and_server"}')
             curl --fail --silent --show-error --request POST https://api.modrinth.com/v2/version \
               -H 'User-Agent: Nie1iX/movewand-release-workflow' \
               -H "Authorization: ${MODRINTH_TOKEN}" \
@@ -93,6 +93,6 @@ jobs:
             test -f "${fabric_jars[0]}"
             test -f "${neoforge_jars[0]}"
             publish "$tag" fabric "${fabric_jars[0]}" "$minecraft_version" "$mod_version" \
-              '[{"project_id":"fabric-api","dependency_type":"required"}]'
+              '[{"project_id":"P7dR8mSH","dependency_type":"required"}]'
             publish "$tag" neoforge "${neoforge_jars[0]}" "$minecraft_version" "$mod_version" '[]'
           done
