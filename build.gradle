@@ -2,6 +2,8 @@ plugins {
 	id 'base'
 }
 
+import java.util.zip.ZipFile
+
 allprojects {
 	group = mod_group
 	version = "${mod_version}+mc${minecraft_version}"
@@ -9,4 +11,36 @@ allprojects {
 
 tasks.named('build') {
     dependsOn ':common:build', ':fabric:build', ':neoforge:build'
+}
+
+tasks.register('verifyReleaseMetadata') {
+    group = 'verification'
+    description = 'Verifies release JAR names and loader metadata.'
+    dependsOn ':fabric:jar', ':neoforge:jar'
+
+    doLast {
+        [
+                [loader: 'fabric', descriptor: 'fabric.mod.json'],
+                [loader: 'neoforge', descriptor: 'META-INF/neoforge.mods.toml']
+        ].each { artifact ->
+            File jar = layout.buildDirectory.file("mods/${mod_id}-${artifact.loader}-${project.version}.jar").get().asFile
+            if (!jar.isFile()) {
+                throw new GradleException("Missing ${artifact.loader} release JAR: ${jar.name}")
+            }
+            new ZipFile(jar).withCloseable { zip ->
+                def entry = zip.getEntry(artifact.descriptor)
+                if (entry == null) {
+                    throw new GradleException("${jar.name} does not contain ${artifact.descriptor}")
+                }
+                String metadata = zip.getInputStream(entry).getText('UTF-8')
+                if (!metadata.contains(mod_id) || !metadata.contains(project.version.toString())) {
+                    throw new GradleException("${jar.name} metadata does not declare ${mod_id} ${project.version}")
+                }
+            }
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn 'verifyReleaseMetadata'
 }
