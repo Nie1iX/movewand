@@ -10,6 +10,7 @@ and manual-QA coverage until their GameTests are ported.
 
 ## Current contract
 
+- `1.21.*` lines require Java 21; `26.*` lines require Java 25. Every release's loader and Minecraft coordinates are embedded in its JAR metadata.
 - MoveWand transfers `BlockState` and `BlockEntity` NBT. Before loading NBT at the destination, it writes the destination `x`, `y`, and `z` coordinates.
 - A destination may be empty, part of the source selection that is freed by the same operation, or a non-source fluid position. Source fluids are rejected.
 - Bedrock, spawners, trial spawners, and blocks in `c:relocation_not_supported`, `forge:relocation_not_supported`, `create:non_movable`, or MoveWand's own denylist tags are rejected before the world changes. Missing tag namespaces do not add a dependency.
