@@ -13,6 +13,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     env:
+      GH_REPO: ${{ github.repository }}
       GH_TOKEN: ${{ github.token }}
       MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
 
