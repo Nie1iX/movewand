@@ -48,15 +48,15 @@ public final class MoveStructureGameTest implements CustomTestMethodInvoker {
     @GameTest
     public void keepsCarpetsWhenMovingAnOverlappingStructure(GameTestHelper context) {
         context.setBlock(SOURCE, Blocks.STONE);
-        context.setBlock(SOURCE.above(), Blocks.CARPET.white());
+        context.setBlock(SOURCE.above(), Blocks.MOSS_CARPET);
         context.setBlock(SOURCE.south(), Blocks.STONE);
-        context.setBlock(SOURCE.south().above(), Blocks.CARPET.white());
+        context.setBlock(SOURCE.south().above(), Blocks.MOSS_CARPET);
 
         move(context, List.of(SOURCE, SOURCE.above(), SOURCE.south(), SOURCE.south().above()), 0, 0, 1, 0);
 
         context.runAfterDelay(2, () -> {
-            context.assertBlockPresent(Blocks.CARPET.white(), SOURCE.south().above());
-            context.assertBlockPresent(Blocks.CARPET.white(), SOURCE.south(2).above());
+            context.assertBlockPresent(Blocks.MOSS_CARPET, SOURCE.south().above());
+            context.assertBlockPresent(Blocks.MOSS_CARPET, SOURCE.south(2).above());
             assertNoDrops(context);
             context.succeed();
         });
