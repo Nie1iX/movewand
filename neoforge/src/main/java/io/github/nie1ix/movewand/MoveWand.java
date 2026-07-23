@@ -2,6 +2,7 @@ package io.github.nie1ix.movewand;
 
 import io.github.nie1ix.movewand.client.MoveWandClient;
 import io.github.nie1ix.movewand.interaction.NeoForgeBlockInteraction;
+import io.github.nie1ix.movewand.move.NeoForgeMoveGameTest;
 import io.github.nie1ix.movewand.network.MoveWandNetworking;
 import io.github.nie1ix.movewand.registry.ModItems;
 import io.github.nie1ix.movewand.selection.ServerSelectionManager;
@@ -16,6 +17,7 @@ public final class MoveWand {
 
     public MoveWand(IEventBus modEventBus, Dist dist) {
         ModItems.ITEMS.register(modEventBus);
+        NeoForgeMoveGameTest.TEST_FUNCTIONS.register(modEventBus);
         modEventBus.addListener(MoveWandNetworking::registerPayloads);
         NeoForge.EVENT_BUS.addListener(ServerSelectionManager::onPlayerLoggedOut);
         NeoForge.EVENT_BUS.addListener(NeoForgeBlockInteraction::onRightClickBlock);

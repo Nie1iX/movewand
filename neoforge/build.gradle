@@ -51,6 +51,10 @@ tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }
 
+tasks.named('check') {
+    dependsOn 'runGameTestServer'
+}
+
 tasks.withType(ProcessResources).configureEach {
     def replaceProperties = [
             minecraft_version      : minecraft_version,
