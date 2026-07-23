@@ -48,6 +48,7 @@ jobs:
           mod_version=$(perl -ne 'print $1 if /^mod_version=(.+)$/' gradle.properties)
           changelog="See https://github.com/${GITHUB_REPOSITORY}/releases/tag/${GITHUB_REF_NAME}"
           modrinth_project_id=$(curl --fail --silent --show-error \
+            -H 'User-Agent: Nie1iX/movewand-release-workflow' \
             -H "Authorization: ${MODRINTH_TOKEN}" https://api.modrinth.com/v2/project/movewand | jq -er '.id')
 
           publish() {
@@ -65,6 +66,7 @@ jobs:
               --argjson dependencies "$dependencies" \
               '{name: $name, version_number: $version, changelog: $changelog, dependencies: $dependencies, game_versions: [$minecraft_version], version_type: "release", loaders: [$loader], project_id: $project_id, file_parts: ["file"], primary_file: "file", environment: "client_and_server"}')
             curl --fail --silent --show-error --request POST https://api.modrinth.com/v2/version \
+              -H 'User-Agent: Nie1iX/movewand-release-workflow' \
               -H "Authorization: ${MODRINTH_TOKEN}" \
               -F "data=${metadata};type=application/json" \
               -F "file=@${artifact}"
