@@ -24,7 +24,9 @@ version. Install only one MoveWand loader variant in an instance.
 2. Place the matching MoveWand JAR in the instance's `mods` directory.
 3. Launch the game with the Java version from the table. Do not install both loader variants.
 
-The Oritech `1.2.9` addon remains on the [`1.21.1` maintenance branch](https://github.com/Nie1iX/movewand/tree/1.21.1); it is not released for the `26.*` lines.
+The Oritech `1.2.9` and NeoForge-only AE2 `19.2.x` addons remain on the
+[`1.21.1` maintenance branch](https://github.com/Nie1iX/movewand/tree/1.21.1).
+They are not released for the `26.*` lines.
 
 ## Building
 
