@@ -1,10 +1,16 @@
 # MoveWand Compatibility Matrix
 
-This document defines the support boundary for the first public alpha. `GameTest covered` means the named scenario has an automated Minecraft `GameTest`; it is not a substitute for manual multiplayer testing in a backed-up world. Those legacy annotation-based GameTests remain on the `mc1.21.1` maintenance line: Minecraft `26.2` replaced that API with data-driven test instances, so this line currently relies on unit tests and manual QA until those scenarios are migrated.
+This document defines the support boundary for the first public alpha. `GameTest covered` means the named scenario has an automated Minecraft `GameTest`; it is not a substitute for manual multiplayer testing in a backed-up world.
+
+The detailed matrix below is covered by the legacy GameTest suite on the `1.21.1`
+maintenance line. The current `26.2` Fabric GameTest suite covers paired doors,
+overlapping carpets, redstone rotation, wall-torch rotation, flowing-water
+destinations, and spawner rejection. The remaining `26.*` cases keep unit-test
+and manual-QA coverage until their GameTests are ported.
 
 ## Current contract
 
-- This version line targets Minecraft `26.2` on Java 25, for Fabric Loader `0.19.3` with Fabric API and NeoForge `26.2.0.25-beta`.
+- `1.21.*` lines require Java 21; `26.*` lines require Java 25. Every release's loader and Minecraft coordinates are embedded in its JAR metadata.
 - MoveWand transfers `BlockState` and `BlockEntity` NBT. Before loading NBT at the destination, it writes the destination `x`, `y`, and `z` coordinates.
 - A destination may be empty, part of the source selection that is freed by the same operation, or a non-source fluid position. Source fluids are rejected.
 - Bedrock, spawners, trial spawners, and blocks in `c:relocation_not_supported`, `forge:relocation_not_supported`, `create:non_movable`, or MoveWand's own denylist tags are rejected before the world changes. Missing tag namespaces do not add a dependency.
