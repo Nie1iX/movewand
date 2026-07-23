@@ -6,19 +6,25 @@ It is not a WorldEdit replacement and it does not copy or paste buildings. Use t
 
 ## Requirements
 
-- Minecraft `1.21.1`
-- Java 21
-- One supported loader:
-  - Fabric Loader `0.16` or newer and Fabric API for Minecraft `1.21.1`
-  - NeoForge `21.1.235`
+Choose the MoveWand JAR that matches the Minecraft version and loader in the
+instance. The complete downloadable list is on the
+[GitHub Releases page](https://github.com/Nie1iX/movewand/releases).
+
+| Minecraft versions | Java | Loaders |
+| --- | --- | --- |
+| `1.21`, `1.21.1`–`1.21.11` | 21 | Fabric and NeoForge |
+| `26.1`, `26.1.1`, `26.1.2`, `26.2` | 25 | Fabric and NeoForge |
+
+Fabric installations also require Fabric API for the matching Minecraft
+version. Install only one MoveWand loader variant in an instance.
 
 ## Installation
 
-1. Install either Fabric Loader with Fabric API, or NeoForge, for Minecraft `1.21.1`.
+1. Install either Fabric Loader with Fabric API, or NeoForge, for the chosen Minecraft version.
 2. Place the matching MoveWand JAR in the instance's `mods` directory.
-3. Launch the game with Java 21. Do not install both loader variants in one instance.
+3. Launch the game with the Java version from the table. Do not install both loader variants.
 
-For Oritech `1.2.9`, also install the matching `movewand-oritech` JAR alongside MoveWand and Oritech. The addon expands a selected Oritech multiblock to its controller and cores, then updates their saved coordinate references.
+The Oritech `1.2.9` addon remains on the [`1.21.1` maintenance branch](https://github.com/Nie1iX/movewand/tree/1.21.1); it is not released for the `26.*` lines.
 
 ## Building
 
@@ -88,6 +94,6 @@ MoveWand preserves `BlockState` and transfers `BlockEntity` data through NBT. Th
 - No copying, pasting, deleting, destination replacement, or mass building.
 - Only 90-degree rotations around the vertical `Y` axis.
 - No Undo command in the current release scope.
-- The supported runtimes are Fabric and NeoForge for Minecraft `1.21.1` on Java 21. Other Minecraft versions, if supported, are released as separate artifacts.
+- Every supported Minecraft version is released as separate Fabric and NeoForge artifacts.
 
 See the [functional specification](docs/functional-spec.md) and [compatibility matrix](docs/compatibility-matrix.md) for the detailed contract.
