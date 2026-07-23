@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [1.21.1]
+    branches: [1.21.9]
   pull_request:
-    branches: [1.21.1]
+    branches: [1.21.9]
   workflow_dispatch:
 
 permissions:
@@ -32,7 +32,7 @@ jobs:
       - name: Upload mod JARs
         uses: actions/upload-artifact@v4
         with:
-          name: movewand-mc1.21.1
+          name: movewand-mc1.21.9
           path: |
             build/mods/*-fabric-*.jar
             build/mods/*-neoforge-*.jar
