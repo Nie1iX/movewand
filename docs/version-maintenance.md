@@ -20,11 +20,12 @@ version, for example `1.21.5` or `26.1.2`.
 
 ## Release publication
 
-The tag workflow creates the GitHub Release and, when the `MODRINTH_TOKEN`
-repository secret is configured, uploads separate Fabric and NeoForge versions
-to the `movewand` Modrinth project. The Fabric upload declares Fabric API as a
+The tag workflow creates the GitHub Release and, when the relevant repository
+secrets are configured, uploads separate Fabric and NeoForge versions to
+Modrinth and CurseForge. The Fabric Modrinth upload declares Fabric API as a
 required dependency; the NeoForge upload has no Fabric API dependency.
 
-The token needs the Modrinth `VERSION_CREATE` scope. A missing token skips only
-the Modrinth step, so GitHub Releases remain usable during local development or
-before the secret is configured.
+`MODRINTH_TOKEN` needs the Modrinth `VERSION_CREATE` scope. `CURSEFORGE_TOKEN`
+is an API token created in the CurseForge author dashboard. A missing token
+skips only that platform's publishing step, so GitHub Releases remain usable
+during local development or before either secret is configured.
