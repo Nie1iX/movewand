@@ -11,6 +11,9 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      MODRINTH_TOKEN_AVAILABLE: ${{ secrets.MODRINTH_TOKEN != '' }}
+      CURSEFORGE_TOKEN_AVAILABLE: ${{ secrets.CURSEFORGE_TOKEN != '' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +43,7 @@ jobs:
           fi
 
       - name: Publish loader variants to Modrinth
-        if: ${{ secrets.MODRINTH_TOKEN != '' }}
+        if: ${{ env.MODRINTH_TOKEN_AVAILABLE == 'true' }}
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
         run: |
@@ -78,7 +81,7 @@ jobs:
           publish neoforge "$neoforge_jar" '[]'
 
       - name: Publish loader variants to CurseForge
-        if: ${{ secrets.CURSEFORGE_TOKEN != '' }}
+        if: ${{ env.CURSEFORGE_TOKEN_AVAILABLE == 'true' }}
         env:
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
         run: |
