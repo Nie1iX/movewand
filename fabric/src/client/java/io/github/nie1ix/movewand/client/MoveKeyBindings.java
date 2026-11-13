@@ -15,12 +15,10 @@ import java.util.List;
 
 public final class MoveKeyBindings {
     private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("movewand", "movewand"));
-    private static final KeyMapping FORWARD = register("key.movewand.move_forward", InputConstants.KEY_R);
-    private static final KeyMapping BACKWARD = register("key.movewand.move_backward", InputConstants.KEY_V);
+    private static final KeyMapping FORWARD = register("key.movewand.move_forward", InputConstants.KEY_UP);
+    private static final KeyMapping BACKWARD = register("key.movewand.move_backward", InputConstants.KEY_DOWN);
     private static final KeyMapping LEFT = register("key.movewand.move_left", InputConstants.KEY_LEFT);
     private static final KeyMapping RIGHT = register("key.movewand.move_right", InputConstants.KEY_RIGHT);
-    private static final KeyMapping UP = register("key.movewand.move_up", InputConstants.KEY_UP);
-    private static final KeyMapping DOWN = register("key.movewand.move_down", InputConstants.KEY_DOWN);
     private static final KeyMapping ROTATE_CLOCKWISE = register("key.movewand.rotate_clockwise", InputConstants.KEY_RBRACKET);
     private static final KeyMapping ROTATE_COUNTER_CLOCKWISE = register("key.movewand.rotate_counter_clockwise", InputConstants.KEY_LBRACKET);
     private static final KeyMapping APPLY = register("key.movewand.apply", InputConstants.KEY_RETURN);
@@ -45,8 +43,6 @@ public final class MoveKeyBindings {
             addWhenPressed(BACKWARD, RelativeMove.BACKWARD, client.player.getDirection());
             addWhenPressed(LEFT, RelativeMove.LEFT, client.player.getDirection());
             addWhenPressed(RIGHT, RelativeMove.RIGHT, client.player.getDirection());
-            addWhenPressed(UP, RelativeMove.UP, client.player.getDirection());
-            addWhenPressed(DOWN, RelativeMove.DOWN, client.player.getDirection());
             while (ROTATE_CLOCKWISE.consumeClick()) {
                 TransformPreview.rotateClockwise();
             }
@@ -64,7 +60,7 @@ public final class MoveKeyBindings {
 
     public static List<KeyMapping> all() {
         return List.of(
-                FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN,
+                FORWARD, BACKWARD, LEFT, RIGHT,
                 ROTATE_CLOCKWISE, ROTATE_COUNTER_CLOCKWISE,
                 APPLY, CANCEL, CLEAR_SELECTION
         );
@@ -79,11 +75,12 @@ public final class MoveKeyBindings {
         ));
     }
 
-    private static void addWhenPressed(KeyMapping key, RelativeMove move, net.minecraft.core.Direction horizontalView) {
+    private static void addWhenPressed(KeyMapping key, RelativeMove baseMove, net.minecraft.core.Direction horizontalView) {
         while (key.consumeClick()) {
+            RelativeMove move = effectiveMove(baseMove);
             if (TransformPreview.isActive()) {
                 TransformPreview.add(move, horizontalView);
-            } else if (isShiftDown()) {
+            } else if (isLeftShiftDown()) {
                 ClientPlayNetworking.send(new ExpandSelectionPayload(move.id(), true));
             } else if (isCtrlDown()) {
                 ClientPlayNetworking.send(new ExpandSelectionPayload(move.id(), false));
@@ -93,8 +90,26 @@ public final class MoveKeyBindings {
         }
     }
 
-    private static boolean isShiftDown() {
-        return InputConstants.isKeyDown(InputConstants.KEY_LSHIFT) || InputConstants.isKeyDown(InputConstants.KEY_RSHIFT);
+    // Right Shift reinterprets forward/backward as up/down, so height is always "Shift + arrow"
+    // without taking the Left-Shift-expands-the-selection shortcut away from forward/backward.
+    private static RelativeMove effectiveMove(RelativeMove baseMove) {
+        if (isRightShiftDown()) {
+            if (baseMove == RelativeMove.FORWARD) {
+                return RelativeMove.UP;
+            }
+            if (baseMove == RelativeMove.BACKWARD) {
+                return RelativeMove.DOWN;
+            }
+        }
+        return baseMove;
+    }
+
+    private static boolean isLeftShiftDown() {
+        return InputConstants.isKeyDown(InputConstants.KEY_LSHIFT);
+    }
+
+    private static boolean isRightShiftDown() {
+        return InputConstants.isKeyDown(InputConstants.KEY_RSHIFT);
     }
 
     private static boolean isCtrlDown() {
