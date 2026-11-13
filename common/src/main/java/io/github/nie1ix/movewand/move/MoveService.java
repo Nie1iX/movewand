@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.Optional;
 
 public final class MoveService {
-    public static final int MAX_OFFSET_DISTANCE = 16;
+    public static final int MAX_OFFSET_DISTANCE = 100;
 
     private MoveService() {
     }

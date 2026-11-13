@@ -10,16 +10,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MoveServiceTest {
     @Test
-    void acceptsANonZeroOffsetWithinSixteenBlocks() {
-        assertTrue(MoveService.hasValidOffset(0, 0, 16));
+    void acceptsANonZeroOffsetWithinOneHundredBlocks() {
+        assertTrue(MoveService.hasValidOffset(0, 0, 100));
         assertTrue(MoveService.hasValidOffset(8, 8, 8));
     }
 
     @Test
-    void rejectsZeroAndOffsetsBeyondSixteenBlocks() {
+    void rejectsZeroAndOffsetsBeyondOneHundredBlocks() {
         assertFalse(MoveService.hasValidOffset(0, 0, 0));
-        assertFalse(MoveService.hasValidOffset(0, 0, 17));
-        assertFalse(MoveService.hasValidOffset(16, 1, 0));
+        assertFalse(MoveService.hasValidOffset(0, 0, 101));
+        assertFalse(MoveService.hasValidOffset(100, 1, 0));
     }
 
     @Test

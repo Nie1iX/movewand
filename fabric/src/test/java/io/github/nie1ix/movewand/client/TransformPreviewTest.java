@@ -14,7 +14,7 @@ class TransformPreviewTest {
 
     @Test
     void rejectsOffsetsBeyondTheMovementLimit() {
-        assertFalse(TransformPreview.isOffsetWithinRange(new BlockPos(0, 0, 17)));
+        assertFalse(TransformPreview.isOffsetWithinRange(new BlockPos(0, 0, 101)));
     }
 
 }

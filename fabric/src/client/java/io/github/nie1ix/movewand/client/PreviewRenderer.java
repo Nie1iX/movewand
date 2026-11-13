@@ -37,7 +37,6 @@ public final class PreviewRenderer {
     }
 
     public static void initialize() {
-        blockModelResolver = new BlockModelResolver(Minecraft.getInstance().getModelManager());
         LevelRenderEvents.AFTER_TRANSLUCENT_FEATURES.register(context -> {
             Minecraft client = Minecraft.getInstance();
             if (client.level == null || client.player == null
@@ -94,6 +93,10 @@ public final class PreviewRenderer {
             Map<BlockPos, BlockState> states,
             Vec3 camera
     ) {
+        if (blockModelResolver == null) {
+            blockModelResolver = new BlockModelResolver(Minecraft.getInstance().getModelManager());
+        }
+
         PoseStack poseStack = context.poseStack();
         SubmitNodeCollector collector = context.submitNodeCollector();
 
