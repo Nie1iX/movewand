@@ -1,6 +1,7 @@
 package io.github.nie1ix.movewand.selection;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -50,6 +51,25 @@ public final class ServerSelectionManager {
             }
         } else {
             player.sendOverlayMessage(Component.translatable("message.movewand.selection.too_large"));
+        }
+        sendSelectionUpdate(player, editor);
+    }
+
+    public static void expand(ServerPlayer player, Direction direction, boolean grow) {
+        SelectionEditor editor = EDITORS.computeIfAbsent(player.getUUID(), ignored -> new SelectionEditor());
+        ExpandResult result = editor.expand(direction, grow);
+        switch (result) {
+            case SUCCESS -> {
+                if (expandPairedBlocks(player, editor)) {
+                    showSelectionSize(player, editor);
+                } else {
+                    editor.clear();
+                    player.sendOverlayMessage(Component.translatable("message.movewand.selection.too_large"));
+                }
+            }
+            case EMPTY_SELECTION -> player.sendOverlayMessage(Component.translatable("message.movewand.selection.empty"));
+            case TOO_SMALL -> player.sendOverlayMessage(Component.translatable("message.movewand.selection.too_small"));
+            case TOO_LARGE -> player.sendOverlayMessage(Component.translatable("message.movewand.selection.too_large"));
         }
         sendSelectionUpdate(player, editor);
     }

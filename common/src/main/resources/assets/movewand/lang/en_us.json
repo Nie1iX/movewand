@@ -20,6 +20,7 @@
   "message.movewand.selection.size": "MoveWand selected %s blocks",
   "message.movewand.selection.toggled": "MoveWand block selection changed",
   "message.movewand.selection.too_large": "MoveWand selection is too large",
+  "message.movewand.selection.too_small": "MoveWand selection cannot be smaller than 1 block",
   "message.movewand.selection.empty": "Select at least one non-air block first",
   "message.movewand.move.blocked": "The destination must be empty",
   "message.movewand.move.unloaded": "The destination chunk is not loaded",
